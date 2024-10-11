@@ -1,0 +1,37 @@
+{
+  "name": "dms-be",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon ./src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@types/logger": "^0.0.5",
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.3",
+    "config": "^3.3.12",
+    "crypto-js": "^4.2.0",
+    "express": "~5.0.0",
+    "express-file-routing": "^3.0.3",
+    "jsonwebtoken": "^9.0.2",
+    "logger": "^0.0.1",
+    "mongodb": "^6.9.0",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/config": "^3.3.5",
+    "@types/crypto-js": "^4.2.2",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/multer": "^1.4.12",
+    "@types/node": "~22.7.4",
+    "@types/uuid": "^10.0.0",
+    "nodemon": "~3.1.7",
+    "ts-node": "~10.9.2",
+    "typescript": "~5.6.2"
+  }
+}
