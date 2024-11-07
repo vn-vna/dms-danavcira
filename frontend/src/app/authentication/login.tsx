@@ -1,3 +1,4 @@
+import React from "react";
 import { FontAwesome } from "@expo/vector-icons";
 import { Button, Input, Layout, Radio, Text } from "@ui-kitten/components";
 import { TouchableWithoutFeedback } from "@ui-kitten/components/devsupport";
@@ -9,8 +10,9 @@ import axios from "axios"
 import * as SecuredStore from "expo-secure-store"
 import CryptoJS from "react-native-crypto-js"
 import { useAppDispatch } from "@Stores/hooks";
-import { setToken } from "@Stores/authorization";
+import { setRole, setToken } from "@Stores/authorization";
 import { useMutation } from "@tanstack/react-query"
+import EncryptedClient from "src/utils/encrypted-client";
 
 interface PasswordFieldIconProps {
   hidden: boolean;
@@ -33,7 +35,6 @@ interface LoginFormData {
 
 interface LoginApiRequest extends Omit<LoginFormData, "savePassword"> { }
 
-
 export default function LoginPage() {
   const router = useRouter();
   const [hidePwdField, setHidePwdField] = useState(true);
@@ -41,28 +42,16 @@ export default function LoginPage() {
 
   const login = useMutation({
     mutationFn: async ({ username, password }: LoginFormData) => {
-      console.log("Perform LOGIN");
-      const key = process.env.EXPO_PUBLIC_ENCRYPTION_KEY ?? "";
-      const reqdata = { username, password } as LoginApiRequest;
-      const encrypted = CryptoJS.AES.encrypt(JSON.stringify(reqdata), key).toString();
-      SecuredStore.setItem("APPLICATION_SAVED_USERNAME", username);
-      SecuredStore.setItem("APPLICATION_SAVED_PASSWORD", password);
-      const token = await axios
-        .post(`${process.env.EXPO_PUBLIC_API_URL ?? "http://10.0.2.2:3000"}/api/v1/users/login`, encrypted, {
-          headers: {
-            "Content-Type": "text/plain"
-          }
-        })
-        .then((response) => {
-          return JSON.parse(CryptoJS.AES.decrypt(response.data, key).toString(CryptoJS.enc.Utf8));
-        })
-        .then((data) => {
-          const token = data.payload.token as string;
-          console.log(`TOKEN: ${token}`)
-          return token;
-        });
-        
-      dispatch(setToken(token));
+      const client = new EncryptedClient();
+      await client.login(username, password);
+
+      if (!client.token) {
+        throw new Error("Invalid username or password");
+      }
+
+      dispatch(setToken(client.token));
+      const { payload: {result }, message } = await client.get("/api/v1/users/me")
+      dispatch(setRole(result.role));
     }
   })
 

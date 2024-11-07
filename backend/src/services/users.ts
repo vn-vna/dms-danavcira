@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken"
 import config from "config"
 import { AuthenticationJwtPayload } from "../middlewares/authentication";
 import { Collection } from "mongodb";
+import parseFilterString from "../utilities/syntaxes";
 
 export enum UserRole {
   SystemAdministrator = 0,
@@ -20,17 +21,27 @@ export enum UserRole {
 
 export type SessionMapping = { [key: string]: number };
 
-export interface UserData {
-  firstname?: string;
-  lastname?: string;
+export interface CustomerData {
+  address?: string;
+  phone?: string;
+  email?: string;
+  long?: number;
+  lat?: number;
+}
+
+export interface StaffData {
+  manager_id?: string;
 }
 
 export interface UserEntity {
   _id: string;
   username: string;
-  data: UserData;
+  data: CustomerData;
   password: string;
   role: UserRole;
+  name?: string;
+  customer_data?: CustomerData;
+  staff_data?: StaffData;
 }
 
 export interface UserEntityView extends Omit<UserEntity, "password"> { }
@@ -75,8 +86,38 @@ export class UserService {
     this.collection_ = database.collection<UserEntity>("user");
   }
 
+  public async search(query: string = "", filter: string = "", page: number = 1) {
+    const mongoQuery = {} as { [key: string]: any };
+    const regex = new RegExp(`${query}.*`);
+
+    mongoQuery["$or"] = [
+      { "username": { "$regex": regex } },
+      { "data.firstname": { "$regex": regex } },
+      { "data.lastname": { "$regex": regex } },
+    ];
+
+    const filters = parseFilterString(filter)
+
+    for (let [fk, fv] of Object.entries(filters)) {
+      mongoQuery[fk] = fv;
+    }
+
+    const results = await this.collection_.find(mongoQuery)
+      .project({ "password": 0, "customer_data.thumbnail": 0 })
+      .skip(10 * (page - 1))
+      .limit(10)
+      .map((doc) => {
+        const { password, ...user } = doc;
+        return user as UserEntityView;
+      })
+      .toArray();
+
+    return results;
+  }
+
+
   public async getUserById(uid: string) {
-    const result = await this.collection_.findOne({ id: uid });
+    const result = await this.collection_.findOne({ _id: uid });
 
     if (!result) {
       return;
@@ -85,7 +126,7 @@ export class UserService {
     return { ...result } as UserEntity;
   }
 
-  public async updateUserById(uid: string, data: UserData) {
+  public async updateUserById(uid: string, data: CustomerData) {
     const result = await this.collection_.updateOne({ id: uid }, {
       $set: { data }
     });
@@ -123,9 +164,26 @@ export class UserService {
       return;
     }
 
-    const { _id, ...user } = result;
+    const { ...user } = result;
 
     return user as UserEntity;
+  }
+
+  public async createCustomer(username: string, data: CustomerData) {
+    const foundUser = await this.getUserByUsername(username);
+    if (foundUser) {
+      throw new Exception(`Username "${username}" exists`);
+    }
+
+    const sessions = {} as SessionMapping;
+    const password = await bcrypt.hash(`${username}--${data.phone}`, 10);
+    const userid = uuid.v6();
+    const newUser = { _id: userid, username, data, role: UserRole.Customer, password, sessions };
+    const result = await this.collection_.insertOne(newUser);
+
+    if (!result.acknowledged) {
+      throw new Exception(`Cannot create user ${username}`);
+    }
   }
 
   public async signup(username: string, pwd: string, role: UserRole) {
@@ -137,7 +195,7 @@ export class UserService {
     const sessions = {} as SessionMapping;
     const password = await bcrypt.hash(`${username}--${pwd}`, 10);
     const userid = uuid.v6();
-    const newUser = { _id: userid, username, data: {}, role, password, sessions };
+    const newUser = { _id: userid, username, data: {}, role, password };
     const result = await this.collection_.insertOne(newUser);
 
     if (!result.acknowledged) {
@@ -172,51 +230,20 @@ export class UserService {
     return this.sessions_.check(session);
   }
 
-  public async list(query?: string, filter?: string, page?: number) {
-    query = query ?? "";
-    filter = filter ?? "";
-    page = page ?? 1;
-    const mongoQuery = {} as { [key: string]: any };
-
-    const regex = new RegExp(`${query}.*`);
-    mongoQuery["$or"] = [
-      { "username": { "$regex": regex } },
-      { "data.firstname": { "$regex": regex } },
-      { "data.lastname": { "$regex": regex } },
-    ];
-
-    const filters = filter.split(",")
-      .map((fstr) => {
-        const fres = fstr.split("=");
-
-        if (fres.length != 2) {
-          return null;
-        }
-
-        switch (fres[0]) {
-          case "role":
-            return { key: "role", value: Number.parseInt(fres[1]) as UserRole }
-
-          default:
-            return null;
-        }
-      })
-      .filter((pred) => pred !== null);
-
-    for (let f of filters) {
-      mongoQuery[f.key] = f.value;
+  public async createUser(data: UserEntity) {
+    const foundUser = await this.getUserByUsername(data.username);
+    if (foundUser) {
+      throw new Exception(`Username "${data.username}" exists`);
     }
 
-    const results = await this.collection_.find(mongoQuery)
-      .skip(10 * (page - 1))
-      .limit(10)
-      .map((doc) => {
-        const { password, ...user } = doc;
-        return user as UserEntityView;
-      })
-      .toArray();
+    const password = await bcrypt.hash(`${data.username}--${data.password}`, 10);
+    const userid = uuid.v6();
+    const newUser = { ...data, password, _id: userid, };
+    const result = await this.collection_.insertOne(newUser);
 
-    return results;
+    if (!result.acknowledged) {
+      throw new Exception(`Cannot create user ${data.username}`);
+    }
   }
 }
 

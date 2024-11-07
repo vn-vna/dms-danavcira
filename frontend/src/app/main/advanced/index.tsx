@@ -1,14 +1,24 @@
+import { clearRole, clearToken } from "@Stores/authorization";
+import { useAppDispatch, useAppSelector } from "@Stores/hooks";
+import { useQuery } from "@tanstack/react-query";
 import { Avatar, Card, CircularProgressBar, Divider, Layout, List, ListItem, Text } from "@ui-kitten/components";
-import { StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+import { Pressable, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import EncryptedClient from "src/utils/encrypted-client";
 
-function AvatarPanel() {
+export interface ProfilePageProps {
+  name: string;
+  username: string;
+}
+
+function AvatarPanel({ name, username }: ProfilePageProps) {
   return (
     <Layout style={styles.avatarLayout}>
       <Avatar style={styles.avatarIcon} source={require("@Assets/icon.png")} size="giant" />
       <Layout>
-        <Text category="h6">VNVNA</Text>
-        <Text>@vnvna</Text>
+        <Text category="h6">{name ?? "User"}</Text>
+        <Text>@{username ?? "username"}</Text>
       </Layout>
     </Layout>
   )
@@ -34,13 +44,47 @@ function TaskCompleted() {
 }
 
 function SelectionPanel() {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
   const selects = [
-    { title: "Tasks", description: "View your tasks" },
-    { title: "Completed", description: "View your completed tasks" },
-    { title: "Settings", description: "Change your settings" },
-    { title: "Change Password", description: "Change your password" },
-    { title: "Help", description: "Get help" },
-    { title: "Logout", description: "Logout from your account" }
+    {
+      title: "Tasks",
+      description: "View your tasks",
+      action: () => {
+
+      }
+    },
+    {
+      title: "Users",
+      description: "User management",
+      action: () => {
+
+      }
+    },
+    {
+      title: "Change Password",
+      description: "Change your password",
+      action: () => {
+        
+      }
+    },
+    {
+      title: "Help",
+      description: "Get help",
+      action: () => {
+
+      }
+    },
+    {
+      title: "Logout",
+      description: "Logout from your account",
+      action: () => {
+        dispatch(clearToken());
+        dispatch(clearRole());
+        router.navigate("/authentication");
+      }
+    }
   ]
 
   return (
@@ -48,8 +92,14 @@ function SelectionPanel() {
       <List
         data={selects}
         renderItem={
-          ({ item: { title, description } }) => (
-            <ListItem title={title} description={description} />
+          ({ item: { title, description, action } }) => (
+            <ListItem
+              title={title}
+              description={description}
+              onPress={() => {
+                action?.();
+              }}
+            />
           )
         }
       />
@@ -58,10 +108,28 @@ function SelectionPanel() {
 }
 
 export default function ProfilePage() {
+  const token = useAppSelector((state) => state.authorization.token);
+
+  const client = new EncryptedClient(token);
+
+  const userDataQuery = useQuery({
+    queryKey: ["user", "search"],
+    queryFn: async () => {
+      const { payload } = await client.get("/api/v1/users/me");
+      return payload;
+    }
+  });
+
+  if (userDataQuery.isLoading) {
+    return <Text>Loading...</Text>
+  }
+
   return (
     <SafeAreaView>
       <Layout style={styles.layout}>
-        <AvatarPanel />
+        <AvatarPanel
+          name={userDataQuery.data.result.firstname + " " + userDataQuery.data.result.lastname}
+          username={userDataQuery.data.result.username} />
         <Divider />
         <Text category="h6">Task Completed</Text>
         <TaskCompleted />

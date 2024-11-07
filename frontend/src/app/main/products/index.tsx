@@ -1,26 +1,45 @@
 import { FontAwesome } from "@expo/vector-icons";
+import { useAppSelector } from "@Stores/hooks";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { Input, Button, Layout, List, ListItem, Text, ButtonGroup } from "@ui-kitten/components";
+import { useRouter } from "expo-router";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import EncryptedClient from "src/utils/encrypted-client";
 
 export default function ProductsPage() {
-  const products = [
-    { title: "Product 1", description: "Description 1" },
-    { title: "Product 2", description: "Description 2" },
-    { title: "Product 3", description: "Description 3" },
-    { title: "Product 4", description: "Description 4" },
-    { title: "Product 5", description: "Description 5" },
-    { title: "Product 6", description: "Description 6" },
-    { title: "Product 7", description: "Description 7" },
-    { title: "Product 8", description: "Description 8" },
-    { title: "Product 9", description: "Description 9" },
-    { title: "Product 10", description: "Description 10" },
-    { title: "Product 11", description: "Description 11" },
-    { title: "Product 12", description: "Description 12" },
-  ]
+  const token = useAppSelector(state => state.authorization.token);
+  const client = new EncryptedClient(token);
+  const router = useRouter();
+
+  const productQuery = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const { payload, message } = await client.get("/api/v1/products");
+
+      if (payload) {
+        return payload.results
+      } else {
+        throw new Error(message);
+      }
+    }
+  })
+
+  if (productQuery.isLoading) {
+    return (
+      <Layout style={styles.container}>
+        <Text>Loading...</Text>
+      </Layout>
+    )
+  }
+
   return (
     <SafeAreaView>
       <Layout style={styles.container}>
+        <Layout style={styles.header}>
+          <Text category="h1">Products</Text>
+        </Layout>
+
         <Layout style={styles.header}>
           <Input placeholder="Search" />
           <ButtonGroup style={styles.filters}>
@@ -30,16 +49,26 @@ export default function ProductsPage() {
             <Button>
               <FontAwesome name="sort" />
             </Button>
-            <Button>
+            <Button
+              onPress={() => {
+                router.push("/main/products/create");
+              }}
+            >
               <FontAwesome name="plus" />
             </Button>
           </ButtonGroup>
         </Layout>
 
         <List
-          data={products}
-          renderItem={({ item: { title, description } }) => (
-            <ListItem title={title} description={description} />
+          data={productQuery.data}
+          renderItem={({ item: { _id, name, price, unit, thumbnail } }) => (
+            <ListItem
+              title={name}
+              description={`Price: ${price} VND / ${unit}`}
+              onPress={() => {
+                router.push(`/main/products/edit?pid=${_id}`);
+              }}
+            />
           )}
         />
 
@@ -50,12 +79,6 @@ export default function ProductsPage() {
             </Button>
             <Button>
               <Text>1</Text>
-            </Button>
-            <Button>
-              <Text>2</Text>
-            </Button>
-            <Button>
-              <Text>2</Text>
             </Button>
             <Button>
               <FontAwesome name="angle-right" />
@@ -76,6 +99,7 @@ const styles = StyleSheet.create({
   header: {
     justifyContent: "center",
     alignItems: "center",
+    marginVertical: 10,
   },
   filters: {
     flexDirection: "row",

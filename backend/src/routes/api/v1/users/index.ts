@@ -1,10 +1,9 @@
 import { Handler } from "express";
-import { authorization } from "../../../../middlewares/authentication";
+import authorization from "../../../../middlewares/authentication";
 import ratelimit from "../../../../middlewares/ratelimit";
-import users, { UserRole } from "../../../../services/user";
+import users, { UserRole } from "../../../../services/users";
 
 export const get = [
-  ratelimit(1, 1000),
   authorization(UserRole.GeneralManager),
   (async (req, res, next) => {
     const uid = req.params["authorized-uid"];
@@ -14,11 +13,28 @@ export const get = [
     const filter = (req.query.f ?? "") as string;
     const page = Number.parseInt((req.query.p ?? "1") as string);
 
-    const results = await users.list(search, filter, page);
+    const results = await users.search(search, filter, page);
 
     res.status(200).send({
       payload: { results },
       message: "Request fullfilled"
     })
+  }) as Handler
+]
+
+export const post = [
+  ratelimit(1, 100),
+  authorization(UserRole.GeneralManager),
+  (async (req, res, next) => {
+    const uid = req.params["authorized-uid"];
+    console.log(`Creating User by ${uid}`);
+
+    const data = req.body;
+    const user = await users.createUser(data);
+
+    res.status(200).send({
+      payload: { user },
+      message: "Request fullfilled"
+    });
   }) as Handler
 ]

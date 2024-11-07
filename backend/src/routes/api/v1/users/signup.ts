@@ -1,6 +1,6 @@
 import { Handler } from "express";
 import ratelimit from "../../../../middlewares/ratelimit";
-import users, { UserRole } from "../../../../services/user"
+import users, { UserRole } from "../../../../services/users"
 import Exception from "../../../../exception";
 
 export const post = [

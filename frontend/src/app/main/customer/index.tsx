@@ -1,30 +1,46 @@
 import { FontAwesome } from "@expo/vector-icons";
+import { useAppSelector } from "@Stores/hooks";
+import { useQuery } from "@tanstack/react-query";
 import { Input, Button, Layout, List, ListItem, Text, ButtonGroup, Modal, Card } from "@ui-kitten/components";
 import { TouchableWithoutFeedback } from "@ui-kitten/components/devsupport";
 import { Link, useRouter } from "expo-router";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import EncryptedClient from "src/utils/encrypted-client";
 
 export default function CustomersPage() {
   const router = useRouter()
+  const token = useAppSelector((state) => state.authorization.token);
+  const client = new EncryptedClient(token);
+
+  const cusomerQuery = useQuery({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      const { payload } = await client.get("/api/v1/users?f=role:6");
+      return payload.results
+    }
+  })
 
   const products = [
     { id: "sdjkhasdjkf", title: "Customer 1", description: "Description 1" },
-    { id: "cid", title: "Customer 2", description: "Description 2" },
-    { id: "cid", title: "Customer 3", description: "Description 3" },
-    { id: "cid", title: "Customer 4", description: "Description 4" },
-    { id: "cid", title: "Customer 5", description: "Description 5" },
-    { id: "cid", title: "Customer 6", description: "Description 6" },
-    { id: "cid", title: "Customer 7", description: "Description 7" },
-    { id: "cid", title: "Customer 8", description: "Description 8" },
-    { id: "cid", title: "Customer 9", description: "Description 9" },
-    { id: "cid", title: "Customer 10", description: "Description 10" },
-    { id: "cid", title: "Customer 11", description: "Description 11" },
-    { id: "cid", title: "Customer 12", description: "Description 12" },
   ]
+
+  if (cusomerQuery.isLoading) {
+    return (
+      <Layout style={styles.container}>
+        <Text>Loading...</Text>
+      </Layout>
+    )
+  }
+
+  console.log(cusomerQuery.data)
+
   return (
     <SafeAreaView>
       <Layout style={styles.container}>
+        <Layout style={styles.header}>
+          <Text category="h1">Customers</Text>
+        </Layout>
         <Layout style={styles.header}>
           <Input placeholder="Search" />
           <ButtonGroup style={styles.filters}>
@@ -35,18 +51,19 @@ export default function CustomersPage() {
               <FontAwesome name="sort" />
             </Button>
             <Button
-              onPress={() => router.push("/main/customer/new")}>
+              onPress={() => router.push("/main/customer/create")}>
               <FontAwesome name="plus" />
             </Button>
           </ButtonGroup>
         </Layout>
 
         <List
-          data={products}
-          renderItem={({ item: { id, title, description } }) => (
-            <ListItem title={title} description={description} onPress={() => {
-              router.push(`/main/customer/view?cid=${id}`)
-            }} />
+          data={cusomerQuery.data}
+          renderItem={({ item: { _id, name, customer_data: { address } } }) => (
+            <ListItem
+              title={name} description={`Address: ${address}`} onPress={() => {
+                router.push(`/main/customer/view?cid=${_id}`)
+              }} />
           )}
         />
 

@@ -1,28 +1,26 @@
 import { Redirect, Tabs } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons"
 import { useAppSelector } from "@Stores/hooks";
+import { useQuery } from "@tanstack/react-query";
+import EncryptedClient from "src/utils/encrypted-client";
+import { useEffect } from "react";
+import { Text } from "@ui-kitten/components";
 
 export default function TabsLayout() {
   const token = useAppSelector((state) => state.authorization.token);
+  const role = useAppSelector((state) => state.authorization.role);
 
   if (!token) {
     return <Redirect href="/authentication" />
   }
 
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs screenOptions={{ headerShown: false, unmountOnBlur: true }}>
       <Tabs.Screen
         name="home"
         options={{
           tabBarLabel: "Home",
           tabBarIcon: ({ color }) => <FontAwesome name="home" color={color} size={20} />,
-        }}
-      />
-      <Tabs.Screen
-        name="orders"
-        options={{
-          tabBarLabel: "Orders",
-          tabBarIcon: ({ color }) => <FontAwesome name="table" color={color} size={20} />,
         }}
       />
       <Tabs.Screen
@@ -40,6 +38,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="warehouse"
+        options={{
+          tabBarLabel: "Warehouse",
+          tabBarIcon: ({ color }) => <FontAwesome name="bank" color={color} size={20} />,
+        }}
+      />
+      <Tabs.Screen
         name="advanced"
         options={{
           tabBarLabel: "Advanced",
@@ -48,4 +53,5 @@ export default function TabsLayout() {
       />
     </Tabs>
   )
+
 }

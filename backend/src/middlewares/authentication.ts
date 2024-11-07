@@ -1,7 +1,7 @@
 import { Handler } from "express";
 import jwt from "jsonwebtoken"
 import config from "config"
-import users, { UserRole } from "../services/user";
+import users, { UserRole } from "../services/users";
 
 export interface AuthenticationJwtPayload {
   id: string,
@@ -9,9 +9,9 @@ export interface AuthenticationJwtPayload {
   session: string,
 }
 
-export function authorization(role: UserRole | undefined = undefined) {
+export default function authorization(role: UserRole | undefined = undefined) {
   return (async (req, res, next) => {
-    const authHeader = req.header("authorization");
+    const authHeader = req.header("Authorization");
     const tokens = authHeader?.split(" ");
 
     if (!tokens || tokens.length != 2 || tokens[0] != "Bearer") {

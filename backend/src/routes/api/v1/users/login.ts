@@ -1,10 +1,9 @@
 import { Handler } from "express";
 import ratelimit from "../../../../middlewares/ratelimit";
-import users from "../../../../services/user"
+import users from "../../../../services/users"
 import Exception from "../../../../exception";
 
 export const post = [
-  ratelimit(1, 1000), // 1 req/s
   (async (req, res, next) => {
     const username = req.body.username as string;
     const password = req.body.password as string;

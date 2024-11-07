@@ -9,18 +9,8 @@ export const get = [
   (async (req, res, next) => {
     const accessUid = req.params["authorized-uid"] as string;
     const accessRole = Number.parseInt(req.params["authorized-role"]) as UserRole;
-    const uid = req.params["uid"] as string;
 
-    let allowAccess = (accessUid === uid) || (accessRole < UserRole.GeneralManager);
-
-    if (!allowAccess) {
-      res.status(403).send({
-        message: "Unauthorized"
-      })
-      return;
-    }
-
-    const user = await users.getUserById(uid);
+    const user = await users.getUserById(accessUid);
 
     if (!user) {
       res.status(404).send({
@@ -37,19 +27,11 @@ export const get = [
 ]
 
 export const put = [
+  ratelimit(1, 1000),
   authorization(),
   (async (req, res, next) => {
     const accessUid = req.params["authorized-uid"] as string;
     const accessRole = Number.parseInt(req.params["authorized-role"]) as UserRole;
-    const uid = req.params["uid"] as string;
-    let allowAccess = (accessUid === uid) || (accessRole < UserRole.GeneralManager);
-
-    if (!allowAccess) {
-      res.status(403).send({
-        message: "Unauthorized"
-      });
-      return;
-    }
 
     const action = req.query.action as string;
 
@@ -57,7 +39,7 @@ export const put = [
       case "data": {
         try {
           const data = req.body.data;
-          await users.updateUserById(uid, data);
+          await users.updateUserById(accessUid, data);
           res.status(200).send({
             message: "Request fullfilled"
           });
@@ -73,7 +55,7 @@ export const put = [
       case "password": {
         try {
           const password = req.body.password;
-          await users.updatePasswordById(uid, password);
+          await users.updatePasswordById(accessUid, password);
           res.status(200).send({
             message: "Request fullfilled"
           });
@@ -96,19 +78,12 @@ export const put = [
 ]
 
 export const del = [
+  ratelimit(1, 1000),
   authorization(),
   (async (req, res, next) => {
     const accessUid = req.params["authorized-uid"] as string;
     const accessRole = Number.parseInt(req.params["authorized-role"]) as UserRole;
-    const uid = req.params["uid"] as string;
-    let allowAccess = (accessUid === uid) || (accessRole <= UserRole.GeneralManager);
 
-    if (!allowAccess) {
-      res.status(403).send({
-        message: "Unauthorized"
-      });
-      return;
-    }
 
     res.status(200).send({
       message: "Request fullfilled"
