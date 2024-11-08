@@ -1,8 +1,8 @@
 import { Handler } from "express";
-import ratelimit from "../../../../middlewares/ratelimit";
-import authorization from "../../../../middlewares/authentication";
-import { UserRole } from "../../../../services/users";
-import tasks from "../../../../services/tasks";
+import ratelimit from "../../../../../middlewares/ratelimit";
+import authorization from "../../../../../middlewares/authentication";
+import { UserRole } from "../../../../../services/users";
+import tasks from "../../../../../services/tasks";
 
 export const get = [
   authorization(UserRole.GeneralManager),
@@ -10,7 +10,7 @@ export const get = [
     const results = await tasks.getTaskById(req.params.id);
 
     res.status(200).send({
-      payload: { results },
+      payload: { ...results },
       message: "Request fullfilled"
     })
   }) as Handler

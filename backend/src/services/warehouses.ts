@@ -21,6 +21,7 @@ export interface WarehouseEntity {
   addr: string;
   long: number;
   lat: number;
+  branch_id?: string;
   items: WarehouseItem;
 }
 
@@ -37,13 +38,10 @@ class WarehouseService {
     this.collection_ = database.collection<WarehouseEntity>("warehouse");
   }
 
-  public async create(name: string, type: WarehouseType, addr: string, long: number, lat: number) {
-    const warehouse: WarehouseEntity = {
-      _id: uuid.v4(),
-      name, type, addr, long, lat, items: {}
-    }
+  public async create(data: Partial<WarehouseEntity>) {
+    const warehouse = { ...data, _id: uuid.v4() };
 
-    await this.collection_.insertOne(warehouse);
+    await this.collection_.insertOne(warehouse as WarehouseEntity);
     return warehouse;
   }
 

@@ -8,7 +8,7 @@ import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import EncryptedClient from "src/utils/encrypted-client";
 
-export default function CustomersPage() {
+export default function UserManagerPage() {
   const router = useRouter()
   const token = useAppSelector((state) => state.authorization.token);
   const client = new EncryptedClient(token);
@@ -16,8 +16,8 @@ export default function CustomersPage() {
   const cusomerQuery = useQuery({
     queryKey: ["customers"],
     queryFn: async () => {
-      const { payload } = await client.get("/api/v1/users?f=role:6");
-      return payload.results
+      const { payload } = await client.get("/api/v1/users");
+      return payload.results.filter((user: any) => user.role !== 6)
     }
   })
 
@@ -39,7 +39,7 @@ export default function CustomersPage() {
     <SafeAreaView>
       <Layout style={styles.container}>
         <Layout style={styles.header}>
-          <Text category="h1">Customers</Text>
+          <Text category="h1">User manager</Text>
         </Layout>
         <Layout style={styles.header}>
           <Input placeholder="Search" />
@@ -51,7 +51,7 @@ export default function CustomersPage() {
               <FontAwesome name="sort" />
             </Button>
             <Button
-              onPress={() => router.push("/main/customer/create")}>
+              onPress={() => router.push("/admin/advanced/user/create")}>
               <FontAwesome name="plus" />
             </Button>
           </ButtonGroup>
@@ -59,10 +59,10 @@ export default function CustomersPage() {
 
         <List
           data={cusomerQuery.data}
-          renderItem={({ item: { _id, name, customer_data: { address } } }) => (
+          renderItem={({ item: { _id, name, username } }) => (
             <ListItem
-              title={name} description={`Address: ${address}`} onPress={() => {
-                router.push(`/main/customer/view?cid=${_id}`)
+              title={name} description={`@${username}`} onPress={() => {
+                router.push(`/admin/advanced/user/view?uid=${_id}`)
               }} />
           )}
         />

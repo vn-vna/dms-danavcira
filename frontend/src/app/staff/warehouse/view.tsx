@@ -31,7 +31,7 @@ export default function WarehouseViewPageLayout() {
   });
 
   if (deleteWarehouse.isSuccess) {
-    return <Redirect href="/main/warehouse" />
+    return <Redirect href="/admin/warehouse" />
   }
 
   if (warehouseQuery.isLoading) {
@@ -69,7 +69,7 @@ export default function WarehouseViewPageLayout() {
 
             <Card>
               <Button status="success" onPress={() => {
-                router.push(`/main/warehouse/edit?wid=${wid}`);
+                router.push(`/admin/warehouse/edit?wid=${wid}`);
               }}>Edit</Button>
               <Button status="danger" onPress={() => { deleteWarehouse.mutate() }}>Delete</Button>
             </Card>
@@ -114,7 +114,7 @@ export default function WarehouseViewPageLayout() {
 
             <Card
               onPress={() => {
-                router.push(`/main/warehouse/items?wid=${wid}`);
+                router.push(`/admin/warehouse/items?wid=${wid}`);
               }}
             >
               <Text category="h6">Items</Text>

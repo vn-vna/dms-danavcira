@@ -85,7 +85,7 @@ export default function WarehousePage() {
             </Button>
             <Button onPress={() => {
               // Navigate to create page
-              router.push("/main/warehouse/create");
+              router.push("/admin/warehouse/create");
             }}>
               <FontAwesome name="plus" />
             </Button>
@@ -98,7 +98,7 @@ export default function WarehousePage() {
               title={name ?? "Unknown"}
               description={addr ?? "Unknown"}
               onPress={() => {
-                router.push(`/main/warehouse/view?wid=${_id}`);
+                router.push(`/admin/warehouse/view?wid=${_id}`);
               }} />
           )}
         />

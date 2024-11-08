@@ -27,6 +27,7 @@ export interface CustomerData {
   email?: string;
   long?: number;
   lat?: number;
+  branch_id?: string;
 }
 
 export interface StaffData {
@@ -40,6 +41,7 @@ export interface UserEntity {
   password: string;
   role: UserRole;
   name?: string;
+  branch_id?: string;
   customer_data?: CustomerData;
   staff_data?: StaffData;
 }
@@ -99,6 +101,11 @@ export class UserService {
     const filters = parseFilterString(filter)
 
     for (let [fk, fv] of Object.entries(filters)) {
+      if (fk === undefined || fv === undefined)
+      {
+        continue;
+      }
+
       mongoQuery[fk] = fv;
     }
 

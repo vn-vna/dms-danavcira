@@ -51,7 +51,7 @@ export default function ProductsPage() {
             </Button>
             <Button
               onPress={() => {
-                router.push("/main/products/create");
+                router.push("/admin/products/create");
               }}
             >
               <FontAwesome name="plus" />
@@ -66,7 +66,7 @@ export default function ProductsPage() {
               title={name}
               description={`Price: ${price} VND / ${unit}`}
               onPress={() => {
-                router.push(`/main/products/edit?pid=${_id}`);
+                router.push(`/admin/products/edit?pid=${_id}`);
               }}
             />
           )}

@@ -28,13 +28,7 @@ export const post = [
     const uid = req.params["authorized-uid"];
     console.log(`Creating Warehouse by ${uid}`);
 
-    const type = req.body["type"];
-    const name = req.body["name"];
-    const address = req.body["address"];
-    const long = req.body["long"];
-    const lat = req.body["lat"];
-
-    const warehouse = await warehouses.create(name, type, address, long, lat);
+    const warehouse = await warehouses.create({ ...req.body });
 
     res.status(200).send({
       payload: { warehouse },

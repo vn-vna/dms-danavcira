@@ -20,12 +20,8 @@ export const put = [
   ratelimit(1, 100),
   authorization(UserRole.GeneralManager),
   (async (req, res, next) => {
-    const name = req.body["name"];
-    const addr = req.body["addr"];
-    const long = req.body["long"];
-    const lat = req.body["lat"];
 
-    const warehouse = await warehouses.updateWarehouseById(req.params.id, { name, addr, long, lat });
+    const warehouse = await warehouses.updateWarehouseById(req.params.id, { ...req.body });
 
     res.status(200).send({
       payload: { warehouse },
@@ -41,7 +37,7 @@ export const del = [
     await warehouses.deleteWarehouse(req.params.id);
 
     res.status(200).send({
-      payload: { },
+      payload: {},
       message: "Request fullfilled"
     })
   }) as Handler

@@ -71,7 +71,7 @@ export default function CreateWarehousePage() {
           }
 
           await client.post("/api/v1/warehouse", data)
-          router.push("/main/warehouse");
+          router.push("/admin/warehouse");
         }}
       >
         {({ handleChange, handleBlur, handleSubmit, values }) => (

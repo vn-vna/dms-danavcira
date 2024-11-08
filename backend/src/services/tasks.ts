@@ -10,14 +10,18 @@ export interface TaskReport {
   type: ReportType;
   long: number;
   lat: number;
+  reported_date: string;
 }
 
 export interface TaskEntity {
   _id: string;
   user_id: string;
+  customer_name?: string;
+  description?: string;
   address: string;
   long: number;
   lat: number;
+  created_date: string;
   report?: TaskReport;
 }
 
@@ -34,16 +38,15 @@ class TaskService {
     this.collection_ = database.collection<TaskEntity>("task");
   }
 
-  public async create(user_id: string, address: string, long: number, lat: number) {
-    const task: TaskEntity = {
+  public async create(user_id: string, data: Partial<TaskEntity>) {
+    const task = {
+      ...data,
       _id: uuid.v4(),
       user_id,
-      address,
-      long,
-      lat
+      created_date: new Date().toISOString()
     }
 
-    await this.collection_.insertOne(task);
+    await this.collection_.insertOne(task as TaskEntity);
     return task;
   }
 
@@ -63,7 +66,7 @@ class TaskService {
     const count = await this.collection_.countDocuments(searchQuery);
     const pages = Math.ceil(count / 10);
 
-    const results = await this.collection_.find({...searchQuery, ...filterInfo})
+    const results = await this.collection_.find({ ...searchQuery, ...filterInfo })
       .skip((page - 1) * 10)
       .limit(10)
       .toArray();

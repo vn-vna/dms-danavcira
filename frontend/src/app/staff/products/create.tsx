@@ -1,16 +1,17 @@
-import { Button, Input, Layout, Text } from "@ui-kitten/components";
-import { Image } from "expo-image";
-import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
+import { useAppSelector } from "@Stores/hooks";
+import { Button, ButtonGroup, Divider, IndexPath, Input, Layout, Select, SelectItem, Text } from "@ui-kitten/components";
 import { Formik } from "formik";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import * as ImagePicker from 'expo-image-picker';
-import * as ImageManipulator from 'expo-image-manipulator'
-import { Asset } from "expo-asset";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useAppSelector } from "@Stores/hooks";
 import EncryptedClient from "src/utils/encrypted-client";
-import * as FileSystem from "expo-file-system";
+import * as ImagePicker from 'expo-image-picker';
+import { Image } from 'expo-image'
+import { Asset, useAssets } from 'expo-asset';
+import { useMutation } from "@tanstack/react-query";
+import * as ImageManipulator from 'expo-image-manipulator'
+import * as FileSystem from 'expo-file-system'
+import { Redirect, router } from "expo-router";
 
 interface ProductCreateFormData {
   name: string;
@@ -19,58 +20,26 @@ interface ProductCreateFormData {
   thumbnail?: string;
 }
 
-export default function EditProductPage() {
-  const router = useRouter();
-  const { pid } = useLocalSearchParams();
+export default function ProductCreatePage() {
   const token = useAppSelector(state => state.authorization.token);
   const client = new EncryptedClient(token);
+  const [assets, errors] = useAssets([require("assets/13434972.png")]);
 
-  const productQuery = useQuery({
-    queryKey: ["products", pid],
-    queryFn: async () => {
-      const { payload, message } = await client.get(`/api/v1/products/${pid}`);
+  console.log(assets);
 
-      if (payload) {
-        return payload
-      } else {
-        throw new Error(message);
-      }
-    }
-  })
-
-  const updateProductMutation = useMutation({
+  const createProductMutation = useMutation({
     mutationFn: async (values: ProductCreateFormData) => {
       const { name, price, unit, thumbnail } = values;
 
-      const response = await client.put(`/api/v1/products/${pid}`, { name, price, unit, thumbnail });
+      const response = await client.post("/api/v1/products", { name, price, unit, thumbnail });
 
       return response;
     }
   })
 
-  const deleteProductMutation = useMutation({
-    mutationFn: async () => {
-      await client.delete(`/api/v1/products/${pid}`);
-    }
-  })
-
-  if (productQuery.isLoading) {
+  if (createProductMutation.isSuccess) {
     return (
-      <Layout style={styles.container}>
-        <Text>Loading...</Text>
-      </Layout>
-    )
-  }
-
-  if (updateProductMutation.isSuccess) {
-    return (
-      <Redirect href="/main/products" />
-    )
-  }
-
-  if (deleteProductMutation.isSuccess) {
-    return (
-      <Redirect href="/main/products" />
+      <Redirect href="/admin/products" />
     )
   }
 
@@ -79,12 +48,11 @@ export default function EditProductPage() {
       <Layout style={styles.container}>
         <Formik
           initialValues={{
-            name: productQuery.data.name,
-            price: productQuery.data.price.toString(),
-            unit: productQuery.data.unit,
-            thumbnail: productQuery.data.thumbnail
+            name: "",
+            price: "",
+            unit: "",
+            thumbnail: assets?.[0]
           } as ProductCreateFormData}
-          enableReinitialize
           validate={(values) => {
             if (!values.name) {
               return { name: "Name is required" };
@@ -102,9 +70,8 @@ export default function EditProductPage() {
               return { thumbnail: "Thumbnail is required" };
             }
           }}
-          onSubmit={async (values) => {
-            await updateProductMutation.mutateAsync(values);
-          }}
+          onSubmit={async (values) => { await createProductMutation.mutateAsync(values); }
+          }
         >
           {({ handleChange, handleBlur, handleSubmit, values, errors }) => (
             <Layout>
@@ -174,22 +141,13 @@ export default function EditProductPage() {
                 onPress={() => handleSubmit()}
                 status="success"
               >
-                Save
+                Create
               </Button>
 
               <Button
                 style={styles.buttons}
-                onPress={() => {
-                  deleteProductMutation.mutate();
-                }}
+                onPress={() => { router.push("/admin/products") }}
                 status="danger"
-              >
-                Delete
-              </Button>
-
-              <Button
-                style={styles.buttons}
-                onPress={() => { router.push("/main/products") }}
               >
                 Cancel
               </Button>
@@ -204,9 +162,10 @@ export default function EditProductPage() {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    padding: 10,
+    height: "100%",
+    padding: 16,
   },
   buttons: {
-    marginTop: 10,
+    marginVertical: 8,
   },
-});
+})

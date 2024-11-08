@@ -28,11 +28,8 @@ export const post = [
   authorization(UserRole.GeneralManager),
   (async (req, res, next) => {
     const uid = req.body["uid"];
-    const address = req.body["address"];
-    const long = req.body["long"];
-    const lat = req.body["lat"];
 
-    const task = await tasks.create(uid, address, long, lat);
+    const task = await tasks.create(uid, req.body);
 
     res.status(200).send({
       payload: { task },

@@ -50,8 +50,10 @@ export default function LoginPage() {
       }
 
       dispatch(setToken(client.token));
-      const { payload: {result }, message } = await client.get("/api/v1/users/me")
+      const { payload: { result }, message } = await client.get("/api/v1/users/me")
       dispatch(setRole(result.role));
+
+      return result;
     }
   })
 
@@ -62,9 +64,16 @@ export default function LoginPage() {
   } as LoginFormData;
 
   if (login.isSuccess) {
-    return (
-      <Redirect href="/main" />
-    )
+    if (login.data.role < 2) {
+      return <Redirect href="/admin/home" />
+    }
+    if (login.data.role < 5)
+    {
+      return <Redirect href="/manager/home" />
+    }
+    else {
+      return <Redirect href="/staff/home" />
+    }
   }
 
   return (
@@ -99,22 +108,12 @@ export default function LoginPage() {
                     />
                   }
                 />
-                <Radio
-                  style={styles.radio}
-                  checked={values.savePassword}
-                  onChange={(checked) => setFieldValue("savePassword", checked)}
-                >
-                  Remember username and password
-                </Radio>
                 <Button
                   onPress={(e) => handleSubmit()}
                   status="success"
                   style={styles.button}>
                   Login
                 </Button>
-                <Link href="/authentication/signup">
-                  <Text>If you didn't have account, let's </Text><Text status="danger">sign up</Text>
-                </Link>
               </>
             )
           }

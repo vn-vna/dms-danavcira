@@ -11,9 +11,9 @@ const DEFAULT_QUERYCLIENT = new QueryClient();
 
 function ApplicationLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false, animation: "flip" }} initialRouteName="/main">
+    <Stack screenOptions={{ headerShown: false, animation: "flip" }} initialRouteName="/admin">
       <Stack.Screen name="index" />
-      <Stack.Screen name="main" />
+      <Stack.Screen name="admin" />
       <Stack.Screen name="authentication" />
     </Stack>
   )

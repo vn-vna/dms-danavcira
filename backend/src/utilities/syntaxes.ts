@@ -5,6 +5,10 @@ export default function parseFilterString(filterString: string) {
   const filterInfo: FilterInfo = {};
 
   for (const part of filterParts) {
+    if (!part.includes(":")) {
+      continue;
+    }
+
     const [key, value] = part.split(":");
 
     try {

@@ -73,11 +73,12 @@ export default function EditWarehousePage() {
       </Text>
       <Formik
         initialValues={{
-          name: warehouseeDataQuery.data.name,
-          type: warehouseeDataQuery.data.type.toString(),
-          address: warehouseeDataQuery.data.addr,
-          longitude: warehouseeDataQuery.data.long.toString(),
-          latitude: warehouseeDataQuery.data.lat.toString(),
+          name: warehouseeDataQuery.data.name ?? "",
+          type: warehouseeDataQuery.data.type.toString() ?? "",
+          branch_id: warehouseeDataQuery.data.branch_id ?? "",
+          address: warehouseeDataQuery.data.addr ?? "",
+          longitude: warehouseeDataQuery.data.long.toString() ?? "",
+          latitude: warehouseeDataQuery.data.lat.toString() ?? "",
         }}
         enableReinitialize
         validate={(values) => {
@@ -86,13 +87,14 @@ export default function EditWarehousePage() {
           const data = {
             name: values.name,
             type: parseInt(values.type),
+            branch_id: values.branch_id,
             addr: values.address,
             long: parseFloat(values.longitude),
             lat: parseFloat(values.latitude),
           }
 
           await warehouseDataEditMutation.mutateAsync(data)
-          router.push("/main/warehouse");
+          router.push("/admin/warehouse");
         }}
       >
         {({ handleChange, handleBlur, handleSubmit, values }) => (
@@ -118,14 +120,20 @@ export default function EditWarehousePage() {
                 value={values.address}
                 onChangeText={handleChange('address')} />
               <Input
+                label="Branch ID"
+                value={values.branch_id}
+                onChangeText={handleChange('branch_id')} />
+              <Input
                 keyboardType="number-pad"
                 label="Longitude"
                 value={values.longitude}
+                disabled
                 onChangeText={handleChange('longitude')} />
               <Input
                 keyboardType="number-pad"
                 label="Latitude"
                 value={values.latitude}
+                disabled
                 onChangeText={handleChange('latitude')} />
               <Button
                 style={styles.buttons}

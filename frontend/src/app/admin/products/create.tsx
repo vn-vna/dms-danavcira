@@ -39,7 +39,7 @@ export default function ProductCreatePage() {
 
   if (createProductMutation.isSuccess) {
     return (
-      <Redirect href="/main/products" />
+      <Redirect href="/admin/products" />
     )
   }
 
@@ -146,7 +146,7 @@ export default function ProductCreatePage() {
 
               <Button
                 style={styles.buttons}
-                onPress={() => { router.push("/main/products") }}
+                onPress={() => { router.push("/admin/products") }}
                 status="danger"
               >
                 Cancel

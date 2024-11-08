@@ -65,7 +65,7 @@ export default function CustomerCreatePageLayout() {
 
   if (createCustomerMutation.isSuccess) {
     return (
-      <Redirect href="/main/customer" />
+      <Redirect href="/admin/customer" />
     )
   }
 
