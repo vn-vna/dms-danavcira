@@ -101,8 +101,7 @@ export class UserService {
     const filters = parseFilterString(filter)
 
     for (let [fk, fv] of Object.entries(filters)) {
-      if (fk === undefined || fv === undefined)
-      {
+      if (fk === undefined || fv === undefined) {
         continue;
       }
 
@@ -134,8 +133,10 @@ export class UserService {
   }
 
   public async updateUserById(uid: string, data: CustomerData) {
-    const result = await this.collection_.updateOne({ id: uid }, {
-      $set: { data }
+    const result = await this.collection_.updateOne({ _id: uid }, {
+      $set: {
+        ...data
+      }
     });
 
     if (!result.acknowledged) {
@@ -151,7 +152,7 @@ export class UserService {
     const user = await this.getUserById(uid);
 
     const password = await bcrypt.hash(`${user?.username}--${pwd}`, 10);
-    const result = await this.collection_.updateOne({ id: uid }, {
+    const result = await this.collection_.updateOne({ _id: uid }, {
       $set: { password }
     });
 

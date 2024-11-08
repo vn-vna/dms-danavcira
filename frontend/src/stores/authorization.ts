@@ -13,6 +13,7 @@ export enum UserRole {
 export interface ApplicationAuthorizationState {
   token?: string;
   role?: UserRole;
+  branch_id?: string;
 }
 
 export const authorizationSlice = createSlice({
@@ -30,10 +31,16 @@ export const authorizationSlice = createSlice({
     },
     clearRole: (state) => {
       state.role = undefined;
+    },
+    setBranchId: (state, action: PayloadAction<string>) => {
+      state.branch_id = action.payload;
+    },
+    clearBranchId: (state) => {
+      state.branch_id = undefined;
     }
   }
 })
 
 export const {
-  setToken, setRole, clearToken, clearRole
+  setToken, setRole, clearToken, clearRole, setBranchId, clearBranchId
 } = authorizationSlice.actions;

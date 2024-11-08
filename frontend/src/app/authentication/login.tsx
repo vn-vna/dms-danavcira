@@ -10,7 +10,7 @@ import axios from "axios"
 import * as SecuredStore from "expo-secure-store"
 import CryptoJS from "react-native-crypto-js"
 import { useAppDispatch } from "@Stores/hooks";
-import { setRole, setToken } from "@Stores/authorization";
+import { setBranchId, setRole, setToken } from "@Stores/authorization";
 import { useMutation } from "@tanstack/react-query"
 import EncryptedClient from "src/utils/encrypted-client";
 
@@ -49,9 +49,10 @@ export default function LoginPage() {
         throw new Error("Invalid username or password");
       }
 
-      dispatch(setToken(client.token));
       const { payload: { result }, message } = await client.get("/api/v1/users/me")
+      dispatch(setToken(client.token));
       dispatch(setRole(result.role));
+      dispatch(setBranchId(result.branch_id));
 
       return result;
     }
@@ -64,16 +65,7 @@ export default function LoginPage() {
   } as LoginFormData;
 
   if (login.isSuccess) {
-    if (login.data.role < 2) {
-      return <Redirect href="/admin/home" />
-    }
-    if (login.data.role < 5)
-    {
-      return <Redirect href="/manager/home" />
-    }
-    else {
-      return <Redirect href="/staff/home" />
-    }
+    return <Redirect href="/admin/home" />
   }
 
   return (

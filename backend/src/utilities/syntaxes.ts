@@ -11,10 +11,18 @@ export default function parseFilterString(filterString: string) {
 
     const [key, value] = part.split(":");
 
-    try {
-      filterInfo[key] = parseInt(value)
+    let is_number = true;
+    for (const char of value) {
+      if (isNaN(parseInt(char))) {
+        is_number = false;
+        break;
+      }
     }
-    catch {
+
+    if (is_number) {
+
+      filterInfo[key] = parseInt(value)
+    } else {
       filterInfo[key] = value
     }
   }

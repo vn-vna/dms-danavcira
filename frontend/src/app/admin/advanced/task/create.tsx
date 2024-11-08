@@ -30,16 +30,6 @@ export default function ProductCreatePage() {
 
   console.log(assets);
 
-  const createProductMutation = useMutation({
-    mutationFn: async (values: any) => {
-      const { name, price, unit, thumbnail } = values;
-
-      const response = await client.post("/api/v1/products", { name, price, unit, thumbnail });
-
-      return response;
-    }
-  })
-
   const findCustomerQuery = useQuery({
     queryKey: ["customers", "find-for-task"],
     queryFn: async () => {
@@ -75,9 +65,9 @@ export default function ProductCreatePage() {
     }
   }, [search])
 
-  if (createProductMutation.isSuccess) {
+  if (addTaskMutation.isSuccess) {
     return (
-      <Redirect href="/admin/products" />
+      <Redirect href={`/admin/advanced/task?uid=${uid}`} />
     )
   }
 
@@ -107,7 +97,6 @@ export default function ProductCreatePage() {
             enableReinitialize
             onSubmit={async (values) => {
               await addTaskMutation.mutateAsync(values);
-              router.push("/admin/advanced/task");
             }}
           >
             {({ handleChange, handleBlur, handleSubmit, values, errors }) => (

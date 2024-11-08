@@ -27,7 +27,7 @@ export const post = [
   ratelimit(1, 100),
   authorization(UserRole.GeneralManager),
   (async (req, res, next) => {
-    const uid = req.body["uid"];
+    const uid = req.body["user_id"];
 
     const task = await tasks.create(uid, req.body);
 

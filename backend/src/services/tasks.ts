@@ -2,6 +2,7 @@ import database from "./db";
 import Lazy from "../utilities/lazy";
 import { Collection } from "mongodb";
 import * as uuid from "uuid";
+import parseFilterString from "../utilities/syntaxes";
 
 
 export type ReportType = "checkin" | "checkout";
@@ -51,22 +52,24 @@ class TaskService {
   }
 
   public async search(query: string = "", filter: string = "", page: number = 1) {
-    const filterParts = filter.split(",");
-    const filterInfo: { [key: string]: string } = {};
-
-    for (const part of filterParts) {
-      const [key, value] = part.split("=");
-      filterInfo[key] = value;
-    }
-
     const searchQuery = {
-      address: { $regex: query, $options: "i" },
+      "$or": [
+        { customer_name: { "$regex": query, "$options": "i" } },
+        { description: { "$regex": query, "$options": "i" } },
+        { address: { "$regex": query, "$options": "i" } }
+      ]
+    } as { [key: string]: any };
+
+    for (const [fk, fv] of Object.entries(parseFilterString(filter))) {
+      if (fk !== undefined && fv !== undefined) {
+        searchQuery[fk] = fv;
+      }
     }
 
     const count = await this.collection_.countDocuments(searchQuery);
     const pages = Math.ceil(count / 10);
 
-    const results = await this.collection_.find({ ...searchQuery, ...filterInfo })
+    const results = await this.collection_.find({ ...searchQuery })
       .skip((page - 1) * 10)
       .limit(10)
       .toArray();

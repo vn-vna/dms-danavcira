@@ -6,8 +6,8 @@ import { Pressable, ScrollView, StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from 'expo-location';
-import { Redirect, useRouter } from "expo-router";
-import { useMutation } from "@tanstack/react-query";
+import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAppSelector } from "@Stores/hooks";
 import EncryptedClient from "src/utils/encrypted-client";
 import unidecode from "unidecode";
@@ -19,16 +19,24 @@ import { Asset } from "expo-asset";
 import CenterModal from "@Comps/center-modal";
 
 export default function UserManagerCreatePageLayout() {
+  const { uid } = useLocalSearchParams();
   const router = useRouter();
   const token = useAppSelector(state => state.authorization.token);
   const client = new EncryptedClient(token);
 
-  const createCustomerMutation = useMutation({
+  const userInfoQuery = useQuery({
+    queryKey: ["users", uid],
+    queryFn: async () => {
+      const { payload } = await client.get(`/api/v1/users/${uid}`);
+      return payload.result
+    }
+  })
+
+  const updateUserMutation = useMutation({
     mutationFn: async (values: any) => {
-      await client.post("/api/v1/users", {
+      await client.put(`/api/v1/users/${uid}?action=data`, {
         username: values.username,
         name: values.name,
-        password: values.password,
         role: parseInt(values.role),
         branch_id: values.branch_id
       });
@@ -44,10 +52,17 @@ export default function UserManagerCreatePageLayout() {
     "Staff"
   ]
 
-
-  if (createCustomerMutation.isSuccess) {
+  if (updateUserMutation.isSuccess) {
     return (
       <Redirect href="/admin/advanced/user" />
+    )
+  }
+
+  if (userInfoQuery.isLoading) {
+    return (
+      <Layout>
+        <Text>Loading...</Text>
+      </Layout>
     )
   }
 
@@ -56,14 +71,14 @@ export default function UserManagerCreatePageLayout() {
       <ScrollView scrollEnabled>
         <Formik
           initialValues={{
-            username: "",
-            name: "",
-            password: "",
-            role: "0",
-            branch_id: ""
+            username: userInfoQuery.data.username,
+            name: userInfoQuery.data.name,
+            role: userInfoQuery.data.role,
+            branch_id: userInfoQuery.data.branch_id,
           }}
+          enableReinitialize
           onSubmit={(values) => {
-            createCustomerMutation.mutate(values);
+            updateUserMutation.mutate(values);
           }}
         >
           {
@@ -84,22 +99,12 @@ export default function UserManagerCreatePageLayout() {
                   onBlur={handleBlur("name")}
                   value={values.name}
                 />
-                {/* branch id */}
                 <Input
                   style={styles.input}
                   label="Branch ID"
                   onChangeText={handleChange("branch_id")}
                   onBlur={handleBlur("branch_id")}
                   value={values.branch_id}
-                />
-
-                <Input
-                  style={styles.input}
-                  label="Password"
-                  onChangeText={handleChange("password")}
-                  onBlur={handleBlur("password")}
-                  value={values.password}
-                  secureTextEntry
                 />
                 <Select
                   style={styles.input}

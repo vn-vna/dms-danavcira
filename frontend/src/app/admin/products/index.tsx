@@ -1,5 +1,6 @@
 import { FontAwesome } from "@expo/vector-icons";
-import { useAppSelector } from "@Stores/hooks";
+import { clearToken } from "@Stores/authorization";
+import { useAppDispatch, useAppSelector } from "@Stores/hooks";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { Input, Button, Layout, List, ListItem, Text, ButtonGroup } from "@ui-kitten/components";
 import { useRouter } from "expo-router";
@@ -11,16 +12,21 @@ export default function ProductsPage() {
   const token = useAppSelector(state => state.authorization.token);
   const client = new EncryptedClient(token);
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const productQuery = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      const { payload, message } = await client.get("/api/v1/products");
-
-      if (payload) {
+      try {
+        const { payload, message } = await client.get("/api/v1/products");
         return payload.results
-      } else {
-        throw new Error(message);
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === "Unauthorized" || error.message === "Token expired") {
+            dispatch(clearToken());
+            router.push("/authentication");
+          }
+        }
       }
     }
   })

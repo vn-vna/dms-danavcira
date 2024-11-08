@@ -42,6 +42,7 @@ export default function CustomerCreatePageLayout() {
           long: parseFloat(values.long),
           lat: parseFloat(values.lat),
           thumbnail: values.thumbnail,
+          branch_id: values.branch_id,
         },
         role: 6
       });
@@ -81,6 +82,7 @@ export default function CustomerCreatePageLayout() {
             long: "",
             lat: "",
             thumbnail: "",
+            branch_id: "",
           }}
           onSubmit={(values) => {
             createCustomerMutation.mutate(values);
@@ -204,6 +206,13 @@ export default function CustomerCreatePageLayout() {
                   onChangeText={handleChange("address")}
                   onBlur={handleBlur("address")}
                   value={values.address}
+                />
+                <Input
+                  style={styles.input}
+                  label="Branch ID"
+                  onChangeText={handleChange("branch_id")}
+                  onBlur={handleBlur("branch_id")}
+                  value={values.branch_id}
                 />
                 <Input
                   style={styles.input}

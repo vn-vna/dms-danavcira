@@ -43,7 +43,9 @@ export default function UserManagerViewPageLayout() {
             </Card>
 
             <Card>
-              <Button status="success" onPress={() => { }}>
+              <Button status="success" onPress={() => {
+                router.push(`/admin/advanced/user/edit?uid=${uid}`)
+              }}>
                 Edit
               </Button>
               <Button status="danger" onPress={() => { }}>
@@ -69,9 +71,9 @@ export default function UserManagerViewPageLayout() {
               </View>
               <Text category="h6">Customer Information</Text>
               <Text>Name: {customerInfoQuery.data?.name}</Text>
-              <Text>Email: {customerInfoQuery.data?.customer_data?.email}</Text>
-              <Text>Phone: {customerInfoQuery.data?.customer_data?.phone}</Text>
-              <Text>Address: {customerInfoQuery.data?.customer_data?.address}</Text>
+              <Text>Username: {customerInfoQuery.data?.username}</Text>
+              <Text>Role: {customerInfoQuery.data?.role}</Text>
+              <Text>Branch: {customerInfoQuery.data?.branch_id}</Text>
             </Card>
 
             <Card

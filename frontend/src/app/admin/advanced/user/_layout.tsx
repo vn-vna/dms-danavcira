@@ -8,6 +8,7 @@ export default function CustomerPageLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="create" options={{ presentation: "modal" }} />
       <Stack.Screen name="view" options={{ presentation: "modal" }} />
+      <Stack.Screen name="edit" options={{ presentation: "modal" }} />
     </Stack>
   )
 }

@@ -56,7 +56,7 @@ export const put = [
     switch (action) {
       case "data": {
         try {
-          const data = req.body.data;
+          const data = req.body;
           await users.updateUserById(uid, data);
           res.status(200).send({
             message: "Request fullfilled"

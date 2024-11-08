@@ -38,7 +38,7 @@ export default function CustomerCreatePageLayout() {
   const updateCustomerMutation = useMutation({
     mutationFn: async (values: any) => {
 
-      const response = await client.put(`/api/v1/users/${cid}`, {
+      const response = await client.put(`/api/v1/users/${cid}?action=data`, {
         name: values.name,
         customer_data: {
           email: values.email,
@@ -46,7 +46,8 @@ export default function CustomerCreatePageLayout() {
           address: values.address,
           long: parseFloat(values.long),
           lat: parseFloat(values.lat),
-          thumbnail: values.thumbnail
+          thumbnail: values.thumbnail,
+          branch_id: values.branch_id,
         }
       });
 
@@ -78,6 +79,7 @@ export default function CustomerCreatePageLayout() {
             long: customerInfoQuery.data.customer_data.long.toString(),
             lat: customerInfoQuery.data.customer_data.lat.toString(),
             thumbnail: customerInfoQuery.data.customer_data.thumbnail,
+            branch_id: customerInfoQuery.data.customer_data.branch_id,
           }}
           onSubmit={async (values) => {
             await updateCustomerMutation.mutateAsync(values);
@@ -201,6 +203,13 @@ export default function CustomerCreatePageLayout() {
                   onChangeText={handleChange("address")}
                   onBlur={handleBlur("address")}
                   value={values.address}
+                />
+                <Input
+                  style={styles.input}
+                  label="Branch ID"
+                  onChangeText={handleChange("branch_id")}
+                  onBlur={handleBlur("branch_id")}
+                  value={values.branch_id}
                 />
                 <Input
                   style={styles.input}

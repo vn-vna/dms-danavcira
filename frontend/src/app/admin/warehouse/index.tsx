@@ -1,6 +1,6 @@
 import React from "react";
 import { FontAwesome } from "@expo/vector-icons";
-import { clearToken } from "@Stores/authorization";
+import { clearToken, UserRole } from "@Stores/authorization";
 import { useAppDispatch, useAppSelector } from "@Stores/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { Input, Button, Layout, List, ListItem, Text, ButtonGroup } from "@ui-kitten/components";
@@ -12,6 +12,8 @@ import EncryptedClient from "src/utils/encrypted-client";
 
 export default function WarehousePage() {
   const token = useAppSelector((state) => state.authorization.token);
+  const role = useAppSelector((state) => state.authorization.role);
+  const branch_id = useAppSelector((state) => state.authorization.branch_id);
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,6 +26,11 @@ export default function WarehousePage() {
       const params = new URLSearchParams();
       params.append("s", search);
       params.append("p", currentPage.toString());
+
+      const filters = [] as string[];
+      if (role !== undefined && role >= UserRole.BranchManager) {
+        filters.push(`branch_id:${branch_id}`);
+      }
 
       try {
         const { payload } = await client.get("/api/v1/warehouse?" + params.toString());
