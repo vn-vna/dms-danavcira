@@ -3,7 +3,7 @@ import BottomModal from "@Comps/bottom-modal";
 import MapSelector from "@Comps/map-selector";
 import { useAppSelector } from "@Stores/hooks";
 import { Button, ButtonGroup, Divider, IndexPath, Input, Layout, Select, SelectItem, Text } from "@ui-kitten/components";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { Formik } from "formik";
 import { useEffect, useState } from "react";
 import { Modal, StyleSheet } from "react-native";
@@ -11,6 +11,8 @@ import MapView, { Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 import EncryptedClient from "src/utils/encrypted-client";
 import * as Location from 'expo-location';
+import { useMutation } from "@tanstack/react-query";
+import { UserRole } from "@Stores/authorization";
 
 const types = [
   { title: "General" },
@@ -21,13 +23,30 @@ const types = [
 export default function CreateWarehousePage() {
   const router = useRouter();
   const token = useAppSelector((state) => state.authorization.token);
+  const role = useAppSelector((state) => state.authorization.role);
+  const branch_id = useAppSelector((state) => state.authorization.branch_id);
   const [showChooseLocation, setShowChooseLocation] = useState(false);
   const [currentLocation, setCurrentLocation] = useState({
-    latitude: 37.78825,
-    longitude: -122.4324,
+    latitude: 21.028511,
+    longitude: 105.78825,
   });
 
   const client = new EncryptedClient(token);
+
+  const createWarehouseMutation = useMutation({
+    mutationFn: async (values: any) => {
+      const { name, type, address, longitude, latitude, branch_id } = values;
+      const response = await client.post("/api/v1/warehouse", {
+        name,
+        type: parseInt(type),
+        addr: address,
+        long: parseFloat(longitude),
+        lat: parseFloat(latitude),
+        branch_id,
+      });
+      return response;
+    }
+  })
 
   useEffect(() => {
     (async () => {
@@ -44,6 +63,10 @@ export default function CreateWarehousePage() {
     })()
   }, []);
 
+  if (createWarehouseMutation.isSuccess) {
+    return <Redirect href="/admin/warehouse" />
+  }
+
   return (
     <SafeAreaView>
       <Text
@@ -58,20 +81,12 @@ export default function CreateWarehousePage() {
           address: "",
           longitude: "0",
           latitude: "0",
+          branch_id: branch_id,
         }}
         validate={(values) => {
         }}
         onSubmit={async (values) => {
-          const data = {
-            name: values.name,
-            type: parseInt(values.type),
-            address: values.address,
-            long: parseFloat(values.longitude),
-            lat: parseFloat(values.latitude),
-          }
-
-          await client.post("/api/v1/warehouse", data)
-          router.push("/admin/warehouse");
+          await createWarehouseMutation.mutateAsync(values);
         }}
       >
         {({ handleChange, handleBlur, handleSubmit, values }) => (
@@ -95,17 +110,28 @@ export default function CreateWarehousePage() {
               <Input
                 label="Address"
                 value={values.address}
-                onChangeText={handleChange('address')} />
+                onChangeText={handleChange('address')}
+              />
+              <Input
+                label="Branch ID"
+                value={values.branch_id}
+                onChangeText={handleChange('branch_id')}
+                disabled={!!role && role > UserRole.GeneralManager}
+              />
               <Input
                 keyboardType="number-pad"
                 label="Longitude"
                 value={values.longitude}
-                onChangeText={handleChange('longitude')} />
+                onChangeText={handleChange('longitude')}
+                disabled
+              />
               <Input
                 keyboardType="number-pad"
                 label="Latitude"
                 value={values.latitude}
-                onChangeText={handleChange('latitude')} />
+                onChangeText={handleChange('latitude')}
+                disabled
+              />
               <Button
                 style={styles.buttons}
                 onPress={() => {

@@ -47,8 +47,8 @@ export default function CustomerCreatePageLayout() {
           long: parseFloat(values.long),
           lat: parseFloat(values.lat),
           thumbnail: values.thumbnail,
-          branch_id: values.branch_id,
-        }
+        },
+        branch_id: values.branch_id,
       });
 
       return response;
@@ -79,7 +79,7 @@ export default function CustomerCreatePageLayout() {
             long: customerInfoQuery.data.customer_data.long.toString(),
             lat: customerInfoQuery.data.customer_data.lat.toString(),
             thumbnail: customerInfoQuery.data.customer_data.thumbnail,
-            branch_id: customerInfoQuery.data.customer_data.branch_id,
+            branch_id: customerInfoQuery.data.branch_id,
           }}
           onSubmit={async (values) => {
             await updateCustomerMutation.mutateAsync(values);

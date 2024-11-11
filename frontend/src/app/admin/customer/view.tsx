@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button, Card, Layout, List, Text } from "@ui-kitten/components";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { ScrollView, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 import EncryptedClient from "src/utils/encrypted-client";
@@ -64,7 +64,7 @@ export default function CustomerViewPageLayout() {
               <Text>Email: {customerInfoQuery.data?.customer_data?.email ?? "Unknown"}</Text>
               <Text>Phone: {customerInfoQuery.data?.customer_data?.phone ?? "Unknown"}</Text>
               <Text>Address: {customerInfoQuery.data?.customer_data?.address ?? "Unknown"}</Text>
-              <Text>Branch ID: {customerInfoQuery.data?.customer_data?.branch_id ?? "Unknown"}</Text>
+              <Text>Branch ID: {customerInfoQuery.data?.branch_id ?? "Unknown"}</Text>
 
               <MapView
                 style={{ width: "100%", height: 200 }}
@@ -87,25 +87,30 @@ export default function CustomerViewPageLayout() {
               </MapView>
             </Card>
 
-            <Card>
+            <Card
+              onPress={() => {
+                router.push(`/admin/customer/orders?cid=${cid}`)
+              }}
+            >
               <Text category="h6">Orders</Text>
             </Card>
 
             <Card>
-              <Text category="h6">Transactions</Text>
-            </Card>
-
-            <Card>
-              <Button status="success" onPress={() => {
-                router.push(`/admin/customer/edit?cid=${cid}`)
-              }}>
+              <Button
+                style={styles.buttons}
+                status="success"
+                onPress={() => {
+                  router.push(`/admin/customer/edit?cid=${cid}`)
+                }}>
                 Edit
               </Button>
-              <Button status="danger" onPress={() => { }}>
+              <Button
+                style={styles.buttons}
+                status="danger"
+                onPress={() => { }}>
                 Delete
               </Button>
             </Card>
-
 
           </Layout>
         </View>
@@ -113,3 +118,17 @@ export default function CustomerViewPageLayout() {
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    height: "100%",
+  },
+  map: {
+    width: "100%",
+    height: "100%",
+  },
+  buttons: {
+    marginVertical: 8,
+  },
+});

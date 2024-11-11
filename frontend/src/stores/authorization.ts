@@ -14,6 +14,7 @@ export interface ApplicationAuthorizationState {
   token?: string;
   role?: UserRole;
   branch_id?: string;
+  uid?: string;
 }
 
 export const authorizationSlice = createSlice({
@@ -37,10 +38,17 @@ export const authorizationSlice = createSlice({
     },
     clearBranchId: (state) => {
       state.branch_id = undefined;
-    }
+    },
+    setUid: (state, action: PayloadAction<string>) => {
+      state.uid = action.payload;
+    },
+    clearUid: (state) => {
+      state.uid = undefined;
+    },
   }
 })
 
 export const {
-  setToken, setRole, clearToken, clearRole, setBranchId, clearBranchId
+  setToken, setRole, clearToken, clearRole, setBranchId, clearBranchId,
+  setUid, clearUid
 } = authorizationSlice.actions;

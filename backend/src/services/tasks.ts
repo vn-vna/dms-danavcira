@@ -23,7 +23,7 @@ export interface TaskEntity {
   long: number;
   lat: number;
   created_date: string;
-  report?: TaskReport;
+  report?: TaskReport[];
 }
 
 class TaskService {
@@ -82,7 +82,7 @@ class TaskService {
   }
 
   public async reportTask(tid: string, report: TaskReport) {
-    const result = await this.collection_.updateOne({ _id: tid }, { $set: { report } });
+    const result = await this.collection_.updateOne({ _id: tid }, { $push: { report: report } });
 
     if (result.matchedCount === 0) {
       throw new Error("Cannot find task");

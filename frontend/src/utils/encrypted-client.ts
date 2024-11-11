@@ -47,8 +47,6 @@ export default class EncryptedClient {
     });
 
     const decrypted = CryptoJS.AES.decrypt(await response.text(), this._secret).toString(CryptoJS.enc.Utf8);
-    console.log(this._token);
-    console.log(decrypted);
 
     let jsondata = JSON.parse(decrypted);
     if (jsondata.message == "Token expired") {

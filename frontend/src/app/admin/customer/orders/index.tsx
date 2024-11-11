@@ -1,64 +1,32 @@
 import React from "react";
 import { FontAwesome } from "@expo/vector-icons";
-import { clearToken, UserRole } from "@Stores/authorization";
-import { useAppDispatch, useAppSelector } from "@Stores/hooks";
-import { useQuery } from "@tanstack/react-query";
-import { Input, Button, Layout, List, ListItem, Text, ButtonGroup } from "@ui-kitten/components";
-import { ExpoRoot, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { Button, ButtonGroup, Input, Layout, List, ListItem, Text } from "@ui-kitten/components";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useQuery } from "@tanstack/react-query";
+import { useAppSelector } from "@Stores/hooks";
 import EncryptedClient from "src/utils/encrypted-client";
 
-export default function WarehousePage() {
+export default function () {
   const token = useAppSelector((state) => state.authorization.token);
-  const role = useAppSelector((state) => state.authorization.role);
-  const branch_id = useAppSelector((state) => state.authorization.branch_id);
+  const client = new EncryptedClient(token);
+
   const router = useRouter();
-  const dispatch = useAppDispatch();
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
+  const { cid } = useLocalSearchParams();
 
-  const client = new EncryptedClient(token);
-  const warehouseQuery = useQuery({
-    queryKey: ["warehouses", "search"],
+  const orderQuery = useQuery({
+    queryKey: ["orders", "search"],
     queryFn: async () => {
-      try {
-        if (!role || role <= UserRole.GeneralManager) {
-          const { payload } = await client.get(`/api/v1/warehouse?s=${search}&page=${currentPage}`);
-          return payload
-        }
-        else {
-          const { payload } = await client.get(`/api/v1/warehouse?s=${search}&p=${currentPage}&f=branch_id:${branch_id}`);
-          return payload
-        }
-      }
-      catch (error) {
-        if (error instanceof Error) {
-          if (error.message === "Unauthorized" || error.message === "Token expired") {
-            dispatch(clearToken());
-            router.push("/authentication");
-          }
-        }
-      }
+      const { payload } = await client.get(`/api/v1/order?s=${search}&p=${currentPage}&f=customer_id:${cid}`);
+      return payload.results;
     }
   })
 
-  useEffect(() => {
-    warehouseQuery.refetch();
-  }, [currentPage])
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      warehouseQuery.refetch();
-    }, 500);
-
-    return () => {
-      clearTimeout(timeout);
-    }
-  }, [search])
-
-  if (warehouseQuery.isLoading) {
+  if (orderQuery.isLoading) {
     return (
       <Layout style={styles.container}>
         <Text>Loading...</Text>
@@ -66,11 +34,14 @@ export default function WarehousePage() {
     )
   }
 
+  console.log(orderQuery.data)
+
   return (
     <SafeAreaView>
+
       <Layout style={styles.container}>
         <Layout style={styles.header}>
-          <Text category="h1">Warehouses</Text>
+          <Text category="h1">Orders</Text>
         </Layout>
 
         <Layout style={styles.header}>
@@ -87,19 +58,18 @@ export default function WarehousePage() {
               <FontAwesome name="sort" />
             </Button>
             <Button onPress={() => {
-              // Navigate to create page
-              router.push("/admin/warehouse/create");
+              router.push("/admin/customer/orders/create?cid=" + cid);
             }}>
               <FontAwesome name="plus" />
             </Button>
           </ButtonGroup>
         </Layout>
         <List
-          data={warehouseQuery.data.results}
-          renderItem={({ item: { _id, name, addr } }) => (
+          data={orderQuery.data}
+          renderItem={({ item: { _id, customer_id, items } }) => ( 
             <ListItem
-              title={name ?? "Unknown"}
-              description={addr ?? "Unknown"}
+              title={_id}
+              description={Object.keys(items).length + " items"}
               onPress={() => {
                 router.push(`/admin/warehouse/view?wid=${_id}`);
               }} />
@@ -124,12 +94,11 @@ export default function WarehousePage() {
               {currentPage}
             </Button>
             {
-              warehouseQuery.data.pages > currentPage
-                ? (
-                  <Button>
-                    {currentPage + 1}
-                  </Button>
-                )
+              1 ? (
+                <Button>
+                  {currentPage + 1}
+                </Button>
+              )
                 : (<></>)
             }
             <Button>

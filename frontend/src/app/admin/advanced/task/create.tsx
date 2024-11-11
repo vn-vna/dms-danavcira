@@ -58,6 +58,7 @@ export default function ProductCreatePage() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       findCustomerQuery.refetch();
+      setSelectedIndex(0);
     }, 500);
 
     return () => {
@@ -92,7 +93,7 @@ export default function ProductCreatePage() {
           <Formik
             initialValues={{
               description: "",
-              customer_id: findCustomerQuery.data[selectedIndex]._id,
+              customer_id: findCustomerQuery.data[selectedIndex]?._id,
             }}
             enableReinitialize
             onSubmit={async (values) => {
@@ -108,16 +109,16 @@ export default function ProductCreatePage() {
                 />
                 <Select
                   label="Customer"
-                  value={findCustomerQuery.data[selectedIndex]?.name}
+                  value={findCustomerQuery.data[selectedIndex]?.name ?? "No customer selected"}
                   selectedIndex={new IndexPath(selectedIndex)}
                 >
                   {findCustomerQuery.data.map((customer: any, index: number) => (
                     <SelectItem
                       onPress={() => {
                         setSelectedIndex(index);
-                        handleChange('customer_id')(customer._id);
+                        handleChange('customer_id')(customer?._id);
                       }}
-                      title={customer.name} />
+                      title={customer?.name} />
                   ))}
                 </Select>
 

@@ -3,6 +3,7 @@ import { useAppSelector } from "@Stores/hooks";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { Input, Button, Layout, List, ListItem, Text, ButtonGroup } from "@ui-kitten/components";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import EncryptedClient from "src/utils/encrypted-client";

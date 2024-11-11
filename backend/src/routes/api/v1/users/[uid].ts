@@ -13,13 +13,6 @@ export const get = [
 
     let allowAccess = (accessUid === uid) || (accessRole < UserRole.GeneralManager);
 
-    if (!allowAccess) {
-      res.status(403).send({
-        message: "Unauthorized"
-      })
-      return;
-    }
-
     const user = await users.getUserById(uid);
 
     if (!user) {
@@ -42,14 +35,6 @@ export const put = [
     const accessUid = req.params["authorized-uid"] as string;
     const accessRole = Number.parseInt(req.params["authorized-role"]) as UserRole;
     const uid = req.params["uid"] as string;
-    let allowAccess = (accessUid === uid) || (accessRole < UserRole.GeneralManager);
-
-    if (!allowAccess) {
-      res.status(403).send({
-        message: "Unauthorized"
-      });
-      return;
-    }
 
     const action = req.query.action as string;
 

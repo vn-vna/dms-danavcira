@@ -1,4 +1,5 @@
 import { FontAwesome } from "@expo/vector-icons";
+import { UserRole } from "@Stores/authorization";
 import { useAppSelector } from "@Stores/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { Input, Button, Layout, List, ListItem, Text, ButtonGroup, Modal, Card } from "@ui-kitten/components";
@@ -11,19 +12,25 @@ import EncryptedClient from "src/utils/encrypted-client";
 export default function CustomersPage() {
   const router = useRouter()
   const token = useAppSelector((state) => state.authorization.token);
+  const role = useAppSelector((state) => state.authorization.role);
+  const branch_id = useAppSelector((state) => state.authorization.branch_id);
   const client = new EncryptedClient(token);
 
-  const cusomerQuery = useQuery({
-    queryKey: ["usermanager", "listuser"],
-    queryFn: async () => {
-      const { payload } = await client.get("/api/v1/users?f=role:6");
-      return payload.results
-    }
-  })
+  console.log(role, branch_id)
 
-  const products = [
-    { id: "sdjkhasdjkf", title: "Customer 1", description: "Description 1" },
-  ]
+  const cusomerQuery = useQuery({
+    queryKey: ["usermanager", "listcustomers"],
+    queryFn: async () => {
+      if (!role || role <= UserRole.GeneralManager) {
+        const { payload } = await client.get(`/api/v1/users?f=role:6`);
+        return payload.results
+      }
+      else {
+        const { payload } = await client.get(`/api/v1/users?f=branch_id:${branch_id},role:6`);
+        return payload.results
+      }
+    }
+  });
 
   if (cusomerQuery.isLoading) {
     return (
@@ -32,8 +39,6 @@ export default function CustomersPage() {
       </Layout>
     )
   }
-
-  console.log(cusomerQuery.data)
 
   return (
     <SafeAreaView>
@@ -59,9 +64,9 @@ export default function CustomersPage() {
 
         <List
           data={cusomerQuery.data}
-          renderItem={({ item: { _id, name, customer_data: { address } } }) => (
+          renderItem={({ item: { _id, name, customer_data } }) => (
             <ListItem
-              title={name} description={`Address: ${address}`} onPress={() => {
+              title={name} description={`Address: ${customer_data?.address}`} onPress={() => {
                 router.push(`/admin/customer/view?cid=${_id}`)
               }} />
           )}

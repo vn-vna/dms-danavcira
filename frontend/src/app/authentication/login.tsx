@@ -10,7 +10,7 @@ import axios from "axios"
 import * as SecuredStore from "expo-secure-store"
 import CryptoJS from "react-native-crypto-js"
 import { useAppDispatch } from "@Stores/hooks";
-import { setBranchId, setRole, setToken } from "@Stores/authorization";
+import { setBranchId, setRole, setToken, setUid } from "@Stores/authorization";
 import { useMutation } from "@tanstack/react-query"
 import EncryptedClient from "src/utils/encrypted-client";
 
@@ -51,8 +51,14 @@ export default function LoginPage() {
 
       const { payload: { result }, message } = await client.get("/api/v1/users/me")
       dispatch(setToken(client.token));
+
+      if (result.role === 6) {
+        throw new Error("You are not allowed to access this page");
+      }
+
       dispatch(setRole(result.role));
       dispatch(setBranchId(result.branch_id));
+      dispatch(setUid(result._id));
 
       return result;
     }

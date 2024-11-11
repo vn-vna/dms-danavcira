@@ -4,7 +4,7 @@ import { UserRole } from "../../../../services/users";
 import orders from "../../../../services/orders";
 
 export const get = [
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
     const uid = req.params["authorized-uid"];
     console.log(`Accessing User List by ${uid}`);
@@ -23,12 +23,11 @@ export const get = [
 ]
 
 export const post = [
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
-    const uid = req.body["uid"];
-    const items = req.body["items"];
-
-    const order = await orders.create(uid, items);
+    const order = await orders.create({
+      ...req.body,
+    });
 
     res.status(200).send({
       payload: { order },

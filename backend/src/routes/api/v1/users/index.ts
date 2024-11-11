@@ -4,7 +4,6 @@ import ratelimit from "../../../../middlewares/ratelimit";
 import users, { UserRole } from "../../../../services/users";
 
 export const get = [
-  authorization(UserRole.GeneralManager),
   (async (req, res, next) => {
     const uid = req.params["authorized-uid"];
     console.log(`Accessing User List by ${uid}`);
@@ -23,8 +22,6 @@ export const get = [
 ]
 
 export const post = [
-  ratelimit(1, 100),
-  authorization(UserRole.GeneralManager),
   (async (req, res, next) => {
     const uid = req.params["authorized-uid"];
     console.log(`Creating User by ${uid}`);

@@ -3,6 +3,7 @@ import Lazy from "../utilities/lazy";
 import database from "./db"
 import Exception from "../exception";
 import { Collection } from "mongodb";
+import parseFilterString from "../utilities/syntaxes";
 
 export interface WarehouseItem {
   [key: string]: number;
@@ -46,16 +47,17 @@ class WarehouseService {
   }
 
   public async search(query: string = "", filter: string = "", page: number = 1) {
-    const filterParts = filter.split(",");
-    const filterInfo: { [key: string]: string } = {};
-
-    for (const part of filterParts) {
-      const [key, value] = part.split("=");
-      filterInfo[key] = value;
-    }
-
     const searchQuery = {
       name: { $regex: query, $options: "i" },
+    } as { [key: string]: any };
+
+    const filters = parseFilterString(filter);
+    for (const [fk, fv] of Object.entries(filters)) {
+      if (fk === undefined || fv === undefined) {
+        continue;
+      }
+
+      searchQuery[fk] = fv;
     }
 
     const count = await this.collection_.countDocuments(searchQuery);

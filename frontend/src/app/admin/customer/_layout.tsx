@@ -4,11 +4,12 @@ import { ScrollView } from "react-native";
 
 export default function CustomerPageLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false, animation: "flip" }}>
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
-      <Stack.Screen name="create" options={{ presentation: "modal" }} />
-      <Stack.Screen name="view" options={{ presentation: "modal" }} />
-      <Stack.Screen name="edit" options={{ presentation: "modal" }} />
+      <Stack.Screen name="create" />
+      <Stack.Screen name="view" />
+      <Stack.Screen name="edit" />
+      <Stack.Screen name="orders" />
     </Stack>
   )
 }

@@ -17,16 +17,19 @@ import * as FileSystem from 'expo-file-system'
 import * as ImagePicker from 'expo-image-picker';
 import { Asset } from "expo-asset";
 import CenterModal from "@Comps/center-modal";
+import { UserRole } from "@Stores/authorization";
 
 export default function CustomerCreatePageLayout() {
   const router = useRouter();
   const token = useAppSelector(state => state.authorization.token);
   const client = new EncryptedClient(token);
+  const role = useAppSelector(state => state.authorization.role);
+  const branch_id = useAppSelector(state => state.authorization.branch_id);
 
   const [showChooseLocation, setShowChooseLocation] = useState(false);
   const [currentLocation, setCurrentLocation] = useState({
-    latitude: 37.78825,
-    longitude: -122.4324,
+    latitude: 21.028511,
+    longitude: 105.78825,
   });
   const [showImagePicker, setShowImagePicker] = useState(false);
 
@@ -42,8 +45,8 @@ export default function CustomerCreatePageLayout() {
           long: parseFloat(values.long),
           lat: parseFloat(values.lat),
           thumbnail: values.thumbnail,
-          branch_id: values.branch_id,
         },
+        branch_id: values.branch_id,
         role: 6
       });
     }
@@ -82,7 +85,7 @@ export default function CustomerCreatePageLayout() {
             long: "",
             lat: "",
             thumbnail: "",
-            branch_id: "",
+            branch_id: branch_id ?? "",
           }}
           onSubmit={(values) => {
             createCustomerMutation.mutate(values);
@@ -213,6 +216,7 @@ export default function CustomerCreatePageLayout() {
                   onChangeText={handleChange("branch_id")}
                   onBlur={handleBlur("branch_id")}
                   value={values.branch_id}
+                  disabled={!((role === undefined) || (role <= UserRole.GeneralManager))}
                 />
                 <Input
                   style={styles.input}

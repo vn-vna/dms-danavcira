@@ -5,7 +5,7 @@ import { UserRole } from "../../../../../services/users";
 import warehouses from "../../../../../services/warehouses";
 
 export const get = [
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
     const warehouse = await warehouses.getWarehouseById(req.params.id);
 
@@ -17,8 +17,7 @@ export const get = [
 ]
 
 export const put = [
-  ratelimit(1, 100),
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
 
     const warehouse = await warehouses.updateWarehouseById(req.params.id, { ...req.body });
@@ -31,8 +30,7 @@ export const put = [
 ]
 
 export const del = [
-  ratelimit(1, 100),
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
     await warehouses.deleteWarehouse(req.params.id);
 

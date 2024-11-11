@@ -5,7 +5,7 @@ import { UserRole } from "../../../../services/users";
 import products from "../../../../services/products";
 
 export const get = [
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
     const search = (req.query.s ?? "") as string;
     const filter = (req.query.f ?? "") as string;

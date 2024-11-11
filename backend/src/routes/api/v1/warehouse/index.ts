@@ -6,7 +6,7 @@ import warehouses from "../../../../services/warehouses";
 
 
 export const get = [
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
     const search = (req.query.s ?? "") as string;
     const filter = (req.query.f ?? "") as string;
@@ -23,7 +23,7 @@ export const get = [
 
 export const post = [
   ratelimit(1, 100),
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
     const uid = req.params["authorized-uid"];
     console.log(`Creating Warehouse by ${uid}`);

@@ -11,6 +11,7 @@ export interface OrderItem {
 export interface OrderEntity {
   _id: string;
   user_id: string;
+  customer_id: string;
   items: OrderItem;
 }
 
@@ -27,12 +28,11 @@ class OrderService {
     this.collection_ = database.collection<OrderEntity>("order");
   }
 
-  public async create(user_id: string, items: OrderItem) {
-    const order: OrderEntity = {
+  public async create(data: Partial<OrderEntity>) {
+    const order = {
+      ...data,
       _id: uuid.v4(),
-      user_id,
-      items
-    }
+    } as OrderEntity;
 
     await this.collection_.insertOne(order);
     return order;

@@ -112,10 +112,6 @@ export class UserService {
       .project({ "password": 0, "customer_data.thumbnail": 0 })
       .skip(10 * (page - 1))
       .limit(10)
-      .map((doc) => {
-        const { password, ...user } = doc;
-        return user as UserEntityView;
-      })
       .toArray();
 
     return results;
