@@ -71,7 +71,7 @@ export default function () {
               title={_id}
               description={Object.keys(items).length + " items"}
               onPress={() => {
-                router.push(`/admin/warehouse/view?wid=${_id}`);
+                router.push(`/admin/customer/orders/view?oid=${_id}`);
               }} />
           )}
         />

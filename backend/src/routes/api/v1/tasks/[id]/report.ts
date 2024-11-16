@@ -6,10 +6,10 @@ import tasks from "../../../../../services/tasks";
 
 export const put = [
   ratelimit(1, 100),
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
     const task_id = req.params.id;
-    const report = req.body["report"];
+    const report = req.body;
 
     const task = await tasks.reportTask(task_id, report);
 

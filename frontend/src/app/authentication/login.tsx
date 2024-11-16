@@ -71,7 +71,7 @@ export default function LoginPage() {
   } as LoginFormData;
 
   if (login.isSuccess) {
-    return <Redirect href="/admin/home" />
+    return <Redirect href="/admin/advanced" />
   }
 
   return (

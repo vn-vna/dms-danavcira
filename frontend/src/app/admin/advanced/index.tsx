@@ -1,4 +1,5 @@
-import { clearRole, clearToken } from "@Stores/authorization";
+import React from "react";
+import { clearRole, clearToken, UserRole } from "@Stores/authorization";
 import { useAppDispatch, useAppSelector } from "@Stores/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Card, CircularProgressBar, Divider, Layout, List, ListItem, Text } from "@ui-kitten/components";
@@ -27,6 +28,8 @@ function AvatarPanel({ name, username }: ProfilePageProps) {
 function SelectionPanel() {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const role = useAppSelector((state) => state.authorization.role);
+  const uid = useAppSelector((state) => state.authorization.uid);
 
   const selects = [
     {
@@ -34,21 +37,32 @@ function SelectionPanel() {
       description: "User management tool for admins",
       action: () => {
         router.navigate("/admin/advanced/user");
-      }
+      },
+      enabled: !role || role < UserRole.Staff
+    },
+    {
+      title: "Task View",
+      description: "View your tasks",
+      action: () => {
+        router.navigate("/admin/advanced/task?uid=" + uid);
+      },
+      enabled: true
     },
     {
       title: "Change Password",
       description: "Change your password",
       action: () => {
         router.navigate("/admin/advanced/user/pwd");
-      }
+      },
+      enabled: true
     },
     {
       title: "Help",
       description: "Get help",
       action: () => {
 
-      }
+      },
+      enabled: true
     },
     {
       title: "Logout",
@@ -57,7 +71,8 @@ function SelectionPanel() {
         dispatch(clearToken());
         dispatch(clearRole());
         router.navigate("/authentication");
-      }
+      },
+      enabled: true
     }
   ]
 
@@ -66,14 +81,20 @@ function SelectionPanel() {
       <List
         data={selects}
         renderItem={
-          ({ item: { title, description, action } }) => (
-            <ListItem
-              title={title}
-              description={description}
-              onPress={() => {
-                action?.();
-              }}
-            />
+          ({ item: { title, description, action, enabled } }) => (
+            <>
+              {
+                enabled && (
+                  <ListItem
+                    title={title}
+                    description={description}
+                    onPress={() => {
+                      action?.();
+                    }}
+                  />
+                )
+              }
+            </>
           )
         }
       />

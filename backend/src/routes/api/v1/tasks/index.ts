@@ -5,7 +5,7 @@ import { UserRole } from "../../../../services/users";
 import tasks from "../../../../services/tasks";
 
 export const get = [
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
     const uid = req.params["authorized-uid"];
     console.log(`Accessing User List by ${uid}`);
@@ -25,7 +25,7 @@ export const get = [
 
 export const post = [
   ratelimit(1, 100),
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
     const uid = req.body["user_id"];
 

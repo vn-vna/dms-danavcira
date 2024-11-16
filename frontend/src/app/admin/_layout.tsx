@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import EncryptedClient from "src/utils/encrypted-client";
 import { useEffect } from "react";
 import { Text } from "@ui-kitten/components";
+import { StyleSheet } from "react-native";
 
 export default function TabsLayout() {
   const token = useAppSelector((state) => state.authorization.token);
@@ -20,6 +21,7 @@ export default function TabsLayout() {
         name="home"
         options={{
           tabBarLabel: "Home",
+          href: null,
           tabBarIcon: ({ color }) => <FontAwesome name="home" color={color} size={20} />,
         }}
       />
@@ -55,3 +57,15 @@ export default function TabsLayout() {
   )
 
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    height: "100%",
+    padding: 10,
+  },
+  buttons: {
+    marginVertical: 8,
+  },
+})
+

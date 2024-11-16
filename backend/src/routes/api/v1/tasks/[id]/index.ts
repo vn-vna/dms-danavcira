@@ -5,7 +5,7 @@ import { UserRole } from "../../../../../services/users";
 import tasks from "../../../../../services/tasks";
 
 export const get = [
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
     const results = await tasks.getTaskById(req.params.id);
 
@@ -18,7 +18,7 @@ export const get = [
 
 export const put = [
   ratelimit(1, 100),
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
     const user_id = req.body["uid"];
     const address = req.body["address"];
@@ -36,7 +36,7 @@ export const put = [
 
 export const del = [
   ratelimit(1, 100),
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
     await tasks.deleteTask(req.params.id);
 

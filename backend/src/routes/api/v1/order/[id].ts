@@ -4,7 +4,7 @@ import { UserRole } from "../../../../services/users";
 import orders from "../../../../services/orders";
 
 export const get = [
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
     const results = await orders.getById(req.params.id);
 
@@ -16,7 +16,7 @@ export const get = [
 ]
 
 export const put = [
-  authorization(UserRole.GeneralManager),
+  authorization(),
   (async (req, res, next) => {
     const order_id = req.params.id;
     const items = req.body["items"];

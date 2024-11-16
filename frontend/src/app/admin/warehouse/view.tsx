@@ -116,10 +116,6 @@ export default function WarehouseViewPageLayout() {
             </Card>
 
             <Card>
-              <Text category="h6">Recent distributions</Text>
-            </Card>
-
-            <Card>
               <Button
                 style={styles.buttons}
                 status="success"
