@@ -28,8 +28,8 @@ export default class EncryptedClient {
     });
 
     const loginData = CryptoJS.AES.decrypt(await response.text(), this._secret).toString(CryptoJS.enc.Utf8);
-    const { payload: { token } } = JSON.parse(loginData);
-    this._token = token;
+    const { payload } = JSON.parse(loginData);
+    this._token = payload?.token;
   }
 
   public async request(path: string, method: string, data: any = undefined) {

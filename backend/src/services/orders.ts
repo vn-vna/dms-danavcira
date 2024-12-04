@@ -13,6 +13,9 @@ export interface OrderEntity {
   user_id: string;
   customer_id: string;
   items: OrderItem;
+  task_id?: string;
+  completed: boolean;
+  created_date: Date;
 }
 
 class OrderService {
@@ -38,16 +41,22 @@ class OrderService {
     return order;
   }
 
-  public async search(query: string = "", filter: string = "", page: number = 1) {
+  public async search(
+    query: string = "",
+    filter: string = "",
+    page: number = 1,
+    from: string = "2000-01-01T00:00:00.000Z",
+    to: string = new Date().toISOString()
+  ) {
     const mongoQuery = {} as { [key: string]: any };
-    mongoQuery["$or"] = [
-      { user_id: { $regex: query, $options: "i" } }
-    ];
 
     const filterParts = parseFilterString(filter);
+
     for (let [fk, fv] of Object.entries(filterParts)) {
       mongoQuery[fk] = fv;
     }
+
+    mongoQuery["created_date"] = { $gte: from, $lte: to };
 
     const count = await this.collection_.countDocuments(mongoQuery);
 

@@ -100,7 +100,7 @@ export default function ProductCreatePage() {
                       { compress: 1, format: ImageManipulator.SaveFormat.JPEG },
                     )
 
-                    const base64 = await FileSystem.readAsStringAsync(asset.uri, { encoding: 'base64' });
+                    const base64 = await FileSystem.readAsStringAsync(asset.uri, { encoding: 'base64' })
                     handleChange("thumbnail")(base64);
                   }}
                   style={{ backgroundColor: "#0004", borderRadius: 10000 }}

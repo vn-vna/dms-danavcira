@@ -16,7 +16,7 @@ export default function TabsLayout() {
   }
 
   return (
-    <Tabs screenOptions={{ headerShown: false, unmountOnBlur: true }}>
+    <Tabs screenOptions={{ headerShown: false, unmountOnBlur: true, lazy: true }}>
       <Tabs.Screen
         name="home"
         options={{
@@ -29,6 +29,7 @@ export default function TabsLayout() {
         name="customer"
         options={{
           tabBarLabel: "Customers",
+          href: "/admin/customer",
           tabBarIcon: ({ color }) => <FontAwesome name="user" color={color} size={20} />,
         }}
       />
@@ -36,6 +37,7 @@ export default function TabsLayout() {
         name="products"
         options={{
           tabBarLabel: "Products",
+          href: "/admin/products",
           tabBarIcon: ({ color }) => <FontAwesome name="cube" color={color} size={20} />,
         }}
       />
@@ -43,6 +45,7 @@ export default function TabsLayout() {
         name="warehouse"
         options={{
           tabBarLabel: "Warehouse",
+          href: "/admin/warehouse",
           tabBarIcon: ({ color }) => <FontAwesome name="bank" color={color} size={20} />,
         }}
       />
@@ -50,6 +53,7 @@ export default function TabsLayout() {
         name="advanced"
         options={{
           tabBarLabel: "Advanced",
+          href: "/admin/advanced",
           tabBarIcon: ({ color }) => <FontAwesome name="houzz" color={color} size={20} />,
         }}
       />

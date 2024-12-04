@@ -65,6 +65,7 @@ export default function CustomerViewPageLayout() {
               <Text>Phone: {customerInfoQuery.data?.customer_data?.phone ?? "Unknown"}</Text>
               <Text>Address: {customerInfoQuery.data?.customer_data?.address ?? "Unknown"}</Text>
               <Text>Branch ID: {customerInfoQuery.data?.branch_id ?? "Unknown"}</Text>
+              <Text>Tax Code: {customerInfoQuery.data?.customer_data.tax_code}</Text>
 
               <MapView
                 style={{ width: "100%", height: 200 }}

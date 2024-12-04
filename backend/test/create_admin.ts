@@ -24,7 +24,7 @@ const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
   await collection.insertOne({
     _id: '1ef8b167-41e0-6300-a6e4-4c2f9af554dc',
     username: 'vnvna',
-    data: {},
+    name: 'Admin',
     role: 0,
     password: '$2b$10$aon1WSPrEUPtXBurxBYHt.J7.pdzhxNHyaT3Z/amNQP6c8t3VU3HG',
   });

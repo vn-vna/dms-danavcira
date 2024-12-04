@@ -1,5 +1,5 @@
 import { useAppSelector } from "@Stores/hooks";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Card, Layout, List, Text } from "@ui-kitten/components";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
@@ -21,12 +21,23 @@ export default function () {
     }
   })
 
+  const productDeleteMutation = useMutation({
+    mutationFn: async () => {
+      const { message } = await client.delete(`/api/v1/products/${pid}`);
+      return message;
+    }
+  })
+
   if (productInfoQuery.isLoading) {
     return (
       <Layout>
         <Text>Loading...</Text>
       </Layout>
     )
+  }
+
+  if (productDeleteMutation.isSuccess) {
+    router.push("/admin/products")
   }
 
   return (
@@ -75,7 +86,9 @@ export default function () {
               </Button>
               <Button
                 style={styles.buttons}
-                status="danger" onPress={() => { }}>
+                status="danger" onPress={() => { 
+                  productDeleteMutation.mutate()
+                }}>
                 Delete
               </Button>
               <Button
@@ -86,8 +99,6 @@ export default function () {
                 Cancel
               </Button>
             </Card>
-
-
           </Layout>
         </View>
       </ScrollView>

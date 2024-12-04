@@ -58,6 +58,14 @@ export default function UserManagerViewPageLayout() {
               </Text>
             </Card>
 
+            <Card
+              onPress={() => { router.push(`/admin/advanced/kpi?uid=${uid}`) }}
+            >
+              <Text category="h6">
+                KPI
+              </Text>
+            </Card>
+
             <Card>
               <Button
                 style={styles.buttons}

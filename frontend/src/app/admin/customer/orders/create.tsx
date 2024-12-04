@@ -13,7 +13,7 @@ export default function CreateOrderPage() {
   const token = useAppSelector((state) => state.authorization.token);
   const uid = useAppSelector((state) => state.authorization.uid);
   const client = new EncryptedClient(token);
-  const { cid } = useLocalSearchParams();
+  const { cid, tid } = useLocalSearchParams();
   const router = useRouter();
   const [openAddItem, setOpenAddItem] = useState(false);
   const [searchProduct, setSearchProduct] = useState("");
@@ -35,10 +35,29 @@ export default function CreateOrderPage() {
         items: values.items,
         user_id: values.user_id,
         customer_id: cid,
+        task_id: tid,
       });
       console.log(payload, message);
       return payload;
     }
+  })
+
+  const taskInfoQuery = useQuery({
+    queryKey: ["task", "order", tid],
+    queryFn: async () => {
+      const { payload } = await client.get(`/api/v1/tasks/${tid}`);
+      return payload;
+    },
+    enabled: !!tid
+  })
+
+  const staffInfoQuery = useQuery({
+    queryKey: ["staff", "order", taskInfoQuery.data?.user_id],
+    queryFn: async () => {
+      const { payload } = await client.get(`/api/v1/users/${taskInfoQuery.data.user_id}`);
+      return payload.result;
+    },
+    enabled: taskInfoQuery.isSuccess
   })
 
   useEffect(() => {
@@ -60,7 +79,12 @@ export default function CreateOrderPage() {
   }
 
   if (addOrderMutation.isSuccess) {
-    return <Redirect href={`/admin/customer/orders?cid=${cid}`} />
+    if (!tid) {
+      return <Redirect href={`/admin/customer/orders?cid=${cid}`} />
+    }
+    else {
+      return <Redirect href={`/admin/advanced/task/view?tid=${tid}`} />
+    }
   }
 
   const productMapping = {} as { [key: string]: any };
@@ -74,6 +98,15 @@ export default function CreateOrderPage() {
         scrollEnabled>
         <Layout style={styles.container}>
           <Text category="h1">New Order</Text>
+          {
+            tid && (
+              <Card>
+                <Text>Task: {tid as string}</Text>
+                <Text>Staff: {staffInfoQuery.data?.name}</Text>
+              </Card>
+            )
+          }
+          <Text>Items</Text>
           {
             items.map((item, index) => (
               <Card
@@ -89,7 +122,7 @@ export default function CreateOrderPage() {
             onPress={() => setOpenAddItem(true)}
           >
             Add Item
-          </Button> 
+          </Button>
           <Button
             style={styles.button}
             status="success"
@@ -158,7 +191,7 @@ export default function CreateOrderPage() {
                 }
                 onSelect={(index) => {
                   setSelectedId(productQuery.data[(index as IndexPath).row]._id);
-                }} 
+                }}
               >
                 {
                   productQuery.data.map((product: any) => (

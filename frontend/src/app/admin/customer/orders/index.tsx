@@ -1,13 +1,14 @@
-import React from "react";
+import React, { createElement } from "react";
 import { FontAwesome } from "@expo/vector-icons";
-import { Button, ButtonGroup, Input, Layout, List, ListItem, Text } from "@ui-kitten/components";
+import { Button, ButtonGroup, Card, Input, Layout, List, ListItem, Text } from "@ui-kitten/components";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { useAppSelector } from "@Stores/hooks";
 import EncryptedClient from "src/utils/encrypted-client";
+import View from "./view";
 
 export default function () {
   const token = useAppSelector((state) => state.authorization.token);
@@ -66,13 +67,22 @@ export default function () {
         </Layout>
         <List
           data={orderQuery.data}
-          renderItem={({ item: { _id, customer_id, items } }) => ( 
-            <ListItem
-              title={_id}
-              description={Object.keys(items).length + " items"}
+          renderItem={({ item: { _id, customer_id, items, created_date } }) => (
+            <Card
               onPress={() => {
-                router.push(`/admin/customer/orders/view?oid=${_id}`);
-              }} />
+                router.push("/admin/customer/orders/view?oid=" + _id);
+              }}
+              style={{
+                display: "flex",
+                width: "100%",
+                flexDirection: "row",
+              }}
+            >
+              <Text>{_id}</Text>
+              <Text>{Object.entries(items).length} items</Text>
+              <Text>Date: {created_date ? new Date(created_date).toLocaleString() : "N/A"}</Text>
+              <Text>Incompleted</Text>
+            </Card>
           )}
         />
 
@@ -88,7 +98,9 @@ export default function () {
                     {currentPage - 1}
                   </Button>
                 )
-                : (<></>)
+                : (
+                  <></>
+                )
             }
             <Button>
               {currentPage}

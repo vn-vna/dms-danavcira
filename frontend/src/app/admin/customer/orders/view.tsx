@@ -46,6 +46,24 @@ export default function () {
     enabled: !!itemIds
   });
 
+  const taskInfoQuery = useQuery({
+    queryKey: ["task", "order", orderQuery.data?.task_id],
+    queryFn: async () => {
+      const { payload } = await client.get(`/api/v1/tasks/${orderQuery.data.task_id}`);
+      return payload;
+    },
+    enabled: !!orderQuery.data?.task_id
+  });
+
+  const staffInfoQuery = useQuery({
+    queryKey: ["staff", "order", taskInfoQuery.data?.staff_id],
+    queryFn: async () => {
+      const { payload } = await client.get(`/api/v1/users/${taskInfoQuery.data.user_id}`);
+      return payload.result;
+    },
+    enabled: taskInfoQuery.isSuccess
+  });
+
   useEffect(() => {
     orderQuery.refetch();
   }, [oid]);
@@ -103,7 +121,23 @@ export default function () {
               <Text category="s1">
                 Email: {customerQuery.data?.customer_data.email}
               </Text>
+              <Text>
+                Status: {orderQuery.data.status ? "Completed" : "Incompleted"}
+              </Text>
+              <Text>
+                Created at: {orderQuery.data.created_date ? new Date(orderQuery.data.created_date).toLocaleString() : "N/A"}
+              </Text>
             </Card>
+
+            {
+              orderQuery.data?.task_id && (
+                <Card>
+                  <Text category="h6">Task Information</Text>
+                  <Text>Task ID: {orderQuery.data?.task_id}</Text>
+                  <Text>Order created by: {staffInfoQuery.data?.name} (@{staffInfoQuery.data?.username})</Text>
+                </Card>
+              )
+            }
 
             <Card>
               <Text category="h6">Order Informations</Text>
@@ -117,6 +151,18 @@ export default function () {
             </Card>
 
             <Card>
+              <Button
+                style={styles.buttons}
+                status="danger"
+              >
+                Delete
+              </Button>
+              <Button
+                style={styles.buttons}
+                status="warning"
+              >
+                Update Status
+              </Button>
               <Button
                 style={styles.buttons}
                 status="danger"

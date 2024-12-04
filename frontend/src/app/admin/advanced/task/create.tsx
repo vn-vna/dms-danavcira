@@ -1,5 +1,5 @@
 import { useAppSelector } from "@Stores/hooks";
-import { Button, ButtonGroup, Divider, IndexPath, Input, Layout, Select, SelectItem, Text } from "@ui-kitten/components";
+import { Button, ButtonGroup, Datepicker, Divider, IndexPath, Input, Layout, Select, SelectItem, Text } from "@ui-kitten/components";
 import { Formik } from "formik";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
@@ -49,7 +49,8 @@ export default function ProductCreatePage() {
         customer_name: findCustomerQuery.data[selectedIndex].name,
         address: cdata.address,
         long: cdata.long,
-        lat: cdata.lat
+        lat: cdata.lat,
+        due_date: values.due_date
       });
       return response;
     }
@@ -94,6 +95,7 @@ export default function ProductCreatePage() {
             initialValues={{
               description: "",
               customer_id: findCustomerQuery.data[selectedIndex]?._id,
+              due_date: new Date().toISOString()
             }}
             enableReinitialize
             onSubmit={async (values) => {
@@ -130,6 +132,12 @@ export default function ProductCreatePage() {
                   caption={errors.description}
                   multiline
                   size="large"
+                />
+
+                <Datepicker
+                  label="Due Date"
+                  date={new Date(values.due_date)}
+                  onSelect={(nextDate) => { handleChange("due_date")(nextDate.toISOString()) }}
                 />
 
                 <Button

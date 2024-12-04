@@ -10,6 +10,27 @@ export enum UserRole {
   Customer = 6,
 }
 
+export function roleToString(role: UserRole) {
+  switch (role) {
+    case UserRole.SystemAdministrator:
+      return "System Administrator";
+    case UserRole.GeneralManager:
+      return "General Manager";
+    case UserRole.BranchManager:
+      return "Branch Manager";
+    case UserRole.SaleManager:
+      return "Sale Manager";
+    case UserRole.Officer:
+      return "Officer";
+    case UserRole.Staff:
+      return "Staff";
+    case UserRole.Customer:
+      return "Customer";
+    default:
+      return "Unknown";
+  }
+}
+
 export interface ApplicationAuthorizationState {
   token?: string;
   role?: UserRole;

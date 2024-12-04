@@ -21,11 +21,9 @@ export const put = [
   authorization(),
   (async (req, res, next) => {
     const user_id = req.body["uid"];
-    const address = req.body["address"];
-    const long = req.body["long"];
-    const lat = req.body["lat"];
+    const customer_id = req.body["cid"];
 
-    const task = await tasks.updateTask(req.params.id, {  user_id, address, long, lat });
+    const task = await tasks.updateTask(req.params.id, {  user_id, customer_id });
 
     res.status(200).send({
       payload: { task },

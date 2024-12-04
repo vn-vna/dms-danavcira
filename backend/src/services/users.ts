@@ -28,6 +28,8 @@ export interface CustomerData {
   long?: number;
   lat?: number;
   branch_id?: string;
+  thumbnail?: string;
+  tax_code?: string;
 }
 
 export interface StaffData {
@@ -37,7 +39,6 @@ export interface StaffData {
 export interface UserEntity {
   _id: string;
   username: string;
-  data: CustomerData;
   password: string;
   role: UserRole;
   name?: string;

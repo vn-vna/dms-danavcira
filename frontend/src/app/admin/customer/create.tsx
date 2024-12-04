@@ -45,6 +45,7 @@ export default function CustomerCreatePageLayout() {
           long: parseFloat(values.long),
           lat: parseFloat(values.lat),
           thumbnail: values.thumbnail,
+          tax_code: values.tax_code,
         },
         branch_id: values.branch_id,
         role: 6
@@ -86,6 +87,7 @@ export default function CustomerCreatePageLayout() {
             lat: "",
             thumbnail: "",
             branch_id: branch_id ?? "",
+            tax_code: "",
           }}
           onSubmit={(values) => {
             createCustomerMutation.mutate(values);
@@ -217,6 +219,13 @@ export default function CustomerCreatePageLayout() {
                   onBlur={handleBlur("branch_id")}
                   value={values.branch_id}
                   disabled={!((role === undefined) || (role <= UserRole.GeneralManager))}
+                />
+                <Input
+                  style={styles.input}
+                  label="Tax Code"
+                  onChangeText={handleChange("tax_code")}
+                  onBlur={handleBlur("tax_code")}
+                  value={values.tax_code}
                 />
                 <Input
                   style={styles.input}

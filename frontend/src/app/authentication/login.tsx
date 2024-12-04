@@ -13,6 +13,8 @@ import { useAppDispatch } from "@Stores/hooks";
 import { setBranchId, setRole, setToken, setUid } from "@Stores/authorization";
 import { useMutation } from "@tanstack/react-query"
 import EncryptedClient from "src/utils/encrypted-client";
+import Toast from 'react-native-root-toast'
+import { sleep } from "src/utils/sleep";
 
 interface PasswordFieldIconProps {
   hidden: boolean;
@@ -42,25 +44,57 @@ export default function LoginPage() {
 
   const login = useMutation({
     mutationFn: async ({ username, password }: LoginFormData) => {
-      const client = new EncryptedClient();
-      await client.login(username, password);
+      try {
+        const client = new EncryptedClient();
+        await client.login(username, password);
 
-      if (!client.token) {
-        throw new Error("Invalid username or password");
+        if (!client.token) {
+          Toast.show("Invalid username or password", {
+            duration: Toast.durations.SHORT,
+            position: Toast.positions.BOTTOM,
+            shadow: true,
+            animation: true,
+            hideOnPress: true,
+            delay: 0,
+          });
+
+          throw new Error("Invalid username or password");
+        }
+
+        const { payload: { result }, message } = await client.get("/api/v1/users/me")
+        dispatch(setToken(client.token));
+
+        if (result.role === 6) {
+          Toast.show("You are not allowed to access this page", {
+            duration: Toast.durations.SHORT,
+            position: Toast.positions.BOTTOM,
+            shadow: true,
+            animation: true,
+            hideOnPress: true,
+            delay: 0,
+          });
+
+          throw new Error("You are not allowed to access this page");
+        }
+
+        dispatch(setRole(result.role));
+        dispatch(setBranchId(result.branch_id));
+        dispatch(setUid(result._id));
+
+        Toast.show("Login success", {
+          duration: Toast.durations.SHORT,
+          position: Toast.positions.BOTTOM,
+          shadow: true,
+          animation: true,
+          hideOnPress: true,
+          delay: 0,
+        });
+
+        return result;
+      } catch (error) {
+        console.error(error);
+        return error;
       }
-
-      const { payload: { result }, message } = await client.get("/api/v1/users/me")
-      dispatch(setToken(client.token));
-
-      if (result.role === 6) {
-        throw new Error("You are not allowed to access this page");
-      }
-
-      dispatch(setRole(result.role));
-      dispatch(setBranchId(result.branch_id));
-      dispatch(setUid(result._id));
-
-      return result;
     }
   })
 

@@ -1,3 +1,4 @@
+import React from "react";
 import { FontAwesome } from "@expo/vector-icons";
 import { useAppSelector } from "@Stores/hooks";
 import { useQueries, useQuery } from "@tanstack/react-query";
@@ -7,9 +8,11 @@ import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import EncryptedClient from "src/utils/encrypted-client";
+import { UserRole } from "@Stores/authorization";
 
 export default function ProductsPage() {
   const token = useAppSelector(state => state.authorization.token);
+  const role = useAppSelector(state => state.authorization.role);
   const client = new EncryptedClient(token);
   const router = useRouter();
   const { uid } = useLocalSearchParams();
@@ -51,13 +54,17 @@ export default function ProductsPage() {
             <Button>
               <FontAwesome name="sort" />
             </Button>
-            <Button
-              onPress={() => {
-                router.push(`/admin/advanced/task/create?uid=${uid}`);
-              }}
-            >
-              <FontAwesome name="plus" />
-            </Button>
+            {
+              (!role || role < UserRole.SaleManager)? (
+                <Button
+                  onPress={() => {
+                    router.push(`/admin/advanced/task/create?uid=${uid}`);
+                  }}
+                >
+                  <FontAwesome name="plus" />
+                </Button>
+              ) : <></>
+            }
           </ButtonGroup>
         </Layout>
 

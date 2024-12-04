@@ -49,6 +49,30 @@ function SelectionPanel() {
       enabled: true
     },
     {
+      title: "Order Report",
+      description: "Report daily orders",
+      action: () => {
+        router.navigate("/admin/advanced/kpi");
+      },
+      enabled: !role || role < UserRole.Staff
+    },
+    {
+      title: "Income Report",
+      description: "Report monthly income",
+      action: () => {
+        router.navigate("/admin/advanced/income");
+      },
+      enabled: !role || role < UserRole.Staff
+    },
+    {
+      title: "Task Report",
+      description: "Report task completion",
+      action: () => {
+        router.navigate("/admin/advanced/trp");
+      },
+      enabled: !role || role < UserRole.Staff
+    },
+    {
       title: "Change Password",
       description: "Change your password",
       action: () => {

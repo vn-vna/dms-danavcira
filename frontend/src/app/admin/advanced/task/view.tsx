@@ -13,6 +13,12 @@ import BottomModal from "@Comps/bottom-modal";
 import * as Location from "expo-location";
 import { Formik } from "formik";
 import { FontAwesome } from "@expo/vector-icons";
+import * as ImagePicker from 'expo-image-picker';
+import { Asset } from "expo-asset";
+import * as ImageManipulator from 'expo-image-manipulator'
+import * as FileSystem from 'expo-file-system'
+import { getDistance } from 'geolib';
+import Toast from "react-native-root-toast";
 
 export default function UserManagerViewPageLayout() {
   const { tid } = useLocalSearchParams();
@@ -47,7 +53,11 @@ export default function UserManagerViewPageLayout() {
   const taskReportMutation = useMutation({
     mutationFn: async (values: any) => {
       const { payload } = await client.put(`/api/v1/tasks/${tid}/report`, {
-        ...values,
+        type: values.type,
+        reported_date: values.reported_date,
+        longitude: values.longitude,
+        latitude: values.latitude,
+        thumbnail: values.image,
       });
       return payload;
     }
@@ -135,18 +145,19 @@ export default function UserManagerViewPageLayout() {
             <Card>
               <Text category="h6">Task Description</Text>
               <Text>
-                {taskInfoQuery.data.description}
+                {taskInfoQuery.data?.description}
               </Text>
             </Card>
 
             <Card>
               <Text category="h6">Task Report</Text>
               {
+                taskInfoQuery.data?.report &&
                 taskInfoQuery.data?.report?.map((report: any) => (
                   report ? (
                     <Text>
                       <FontAwesome name="check" size={24} color="green" />
-                      {new Date(report.reported_date).toLocaleString()} - {report.type}
+                      {new Date(report?.reported_date).toLocaleString()} - {report?.type}
                     </Text>
                   ) : (<></>)
                 ))
@@ -156,14 +167,6 @@ export default function UserManagerViewPageLayout() {
             {
               !role || role < UserRole.Staff ? (
                 <Card>
-                  <Button
-                    style={styles.buttons}
-                    status="success"
-                    onPress={() => {
-
-                    }}>
-                    Edit
-                  </Button>
                   <Button
                     style={styles.buttons}
                     status="danger"
@@ -176,23 +179,53 @@ export default function UserManagerViewPageLayout() {
               ) : (
                 <>
                   <Card>
-                    <Button
-                      style={styles.buttons}
-                      status="success"
-                      onPress={() => {
-                        setOpenCheckin(true);
-                      }}>
-                      Check In
-                    </Button>
+                    {
+                      taskInfoQuery.data?.report == undefined || taskInfoQuery.data?.report?.length === 0 ? (
+                        <Button
+                          style={styles.buttons}
+                          status="success"
+                          onPress={() => {
+                            setOpenCheckin(true);
+                          }}>
+                          Check In
+                        </Button>
+                      ) : (<></>)
+                    }
 
-                    <Button
-                      style={styles.buttons}
-                      status="danger"
-                      onPress={() => {
-                        setOpenCheckout(true);
-                      }}>
-                      Check Out
-                    </Button>
+                    {
+                      taskInfoQuery.data?.report != undefined &&
+                        taskInfoQuery.data?.report?.length >= 1 &&
+                        taskInfoQuery.data?.report?.[taskInfoQuery.data?.report?.length - 1]?.type !== "checkout"
+                        ? (
+                          <>
+                            <Button
+                              style={styles.buttons}
+                              status="warning"
+                              onPress={() => {
+                                router.push(`/admin/customer/orders/create?tid=${tid}&cid=${taskInfoQuery.data.customer_id}`);
+                              }}>
+                              Create Order
+                            </Button>
+
+                            <Button
+                              style={styles.buttons}
+                              status="success"
+                              onPress={() => {
+                                setOpenCheckout(true);
+                              }}>
+                              Check Out
+                            </Button>
+                          </>
+                        ) : (<></>)
+                    }
+
+                    {
+                      taskInfoQuery.data?.report?.[taskInfoQuery.data?.report?.length - 1]?.type === "checkout" && (
+                        <Text>
+                          Task Completed
+                        </Text>
+                      )
+                    }
                   </Card>
                 </>
               )
@@ -209,8 +242,10 @@ export default function UserManagerViewPageLayout() {
           initialValues={{
             longitude: currentLocation.longitude.toString(),
             latitude: currentLocation.latitude.toString(),
+            image: "",
           }}
           onSubmit={(values) => {
+
             taskReportMutation.mutate({
               type: "checkin",
               reported_date: new Date().toISOString(),
@@ -245,7 +280,7 @@ export default function UserManagerViewPageLayout() {
                     pitch: 0,
                     heading: 0,
                     altitude: 0,
-                    zoom: 20,
+                    zoom: 20
                   }
                 }
               >
@@ -264,18 +299,70 @@ export default function UserManagerViewPageLayout() {
                     latitude: customerInfoQuery.data?.customer_data?.lat,
                     longitude: customerInfoQuery.data?.customer_data?.long,
                   }}
-                  radius={5000}
+                  radius={50}
                   fillColor="rgba(255, 0, 0, 0.1)"
                 />
               </MapView>
 
               <Button
                 style={{ position: "absolute", width: "100%", bottom: 0 }}
-                onPress={() => {
+                onPress={async () => {
+                  const distance = getDistance(
+                    {
+                      longitude: currentLocation.longitude,
+                      latitude: currentLocation.latitude,
+                    },
+                    {
+                      longitude: customerInfoQuery.data?.customer_data?.long,
+                      latitude: customerInfoQuery.data?.customer_data?.lat,
+                    }
+                  );
+
+                  console.log(distance);
+
+                  if (distance > 1000) {
+                    Toast.show(`You are too far from customer (${distance} meters)`, {
+                      position: Toast.positions.CENTER,
+                      duration: Toast.durations.LONG,
+                      shadow: true,
+                      animation: true,
+                      hideOnPress: true,
+                      delay: 0,
+                    });
+
+                    setOpenCheckin(false);
+
+                    return;
+                  }
+
+                  let result = await ImagePicker.launchCameraAsync({
+                    mediaTypes: ImagePicker.MediaTypeOptions.All,
+                    allowsEditing: true,
+                    quality: 0.5,
+                  });
+
+                  if (result.canceled) {
+                    return;
+                  }
+
+                  const image = Asset.fromModule(result.assets[0].uri);
+                  await image.downloadAsync();
+
+                  const asset = await ImageManipulator.manipulateAsync(
+                    result.assets[0].uri,
+                    [
+                      { resize: { width: 200, height: 200 } },
+                    ],
+                    { compress: 1, format: ImageManipulator.SaveFormat.JPEG },
+                  )
+
+                  const base64 = await FileSystem.readAsStringAsync(asset.uri, { encoding: 'base64' })
+                  handleChange("thumbnail")(base64);
+
                   setOpenCheckin(false);
                   handleSubmit();
                 }}>
-                <Text>Save</Text>
+                <Text>Check In</Text>
               </Button>
             </>
           )}

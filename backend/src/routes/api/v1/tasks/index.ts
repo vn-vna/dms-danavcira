@@ -12,9 +12,11 @@ export const get = [
 
     const search = (req.query.s ?? "") as string;
     const filter = (req.query.f ?? "") as string;
+    const from = (req.query.from ?? "2000-01-01T00:00:00.000Z") as string;
+    const to = (req.query.to ?? new Date().toISOString()) as string;
     const page = Number.parseInt((req.query.p ?? "1") as string);
 
-    const results = await tasks.search(search, filter, page);
+    const results = await tasks.search(search, filter, page, from, to);
 
     res.status(200).send({
       payload: { ...results },

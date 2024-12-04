@@ -5,24 +5,23 @@ import * as uuid from "uuid";
 import parseFilterString from "../utilities/syntaxes";
 
 
-export type ReportType = "checkin" | "checkout";
+export type ReportType = "checkin" | "checkout" | "order";
 
 export interface TaskReport {
   type: ReportType;
-  long: number;
-  lat: number;
+  long?: number;
+  lat?: number;
   reported_date: string;
+  thumbnail?: string;
+  order_id?: string;
 }
 
 export interface TaskEntity {
   _id: string;
   user_id: string;
-  customer_name?: string;
-  description?: string;
-  address: string;
-  long: number;
-  lat: number;
+  customer_id: string;
   created_date: string;
+  order_id?: string;
   report?: TaskReport[];
 }
 
@@ -51,13 +50,14 @@ class TaskService {
     return task;
   }
 
-  public async search(query: string = "", filter: string = "", page: number = 1) {
+  public async search(query: string = "", filter: string = "", page: number = 1, from: string = "2000-01-01T00:00:00.000Z", to: string = new Date().toISOString()) {
     const searchQuery = {
       "$or": [
         { customer_name: { "$regex": query, "$options": "i" } },
         { description: { "$regex": query, "$options": "i" } },
         { address: { "$regex": query, "$options": "i" } }
-      ]
+      ],
+      created_date: { $gte: from, $lte: to }
     } as { [key: string]: any };
 
     for (const [fk, fv] of Object.entries(parseFilterString(filter))) {

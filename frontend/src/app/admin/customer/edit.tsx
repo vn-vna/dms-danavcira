@@ -47,6 +47,7 @@ export default function CustomerCreatePageLayout() {
           long: parseFloat(values.long),
           lat: parseFloat(values.lat),
           thumbnail: values.thumbnail,
+          tax_code: values.tax_code,
         },
         branch_id: values.branch_id,
       });
@@ -80,6 +81,7 @@ export default function CustomerCreatePageLayout() {
             lat: customerInfoQuery.data.customer_data.lat.toString(),
             thumbnail: customerInfoQuery.data.customer_data.thumbnail,
             branch_id: customerInfoQuery.data.branch_id,
+            tax_code: customerInfoQuery.data.customer_data.tax_code,
           }}
           onSubmit={async (values) => {
             await updateCustomerMutation.mutateAsync(values);
@@ -210,6 +212,13 @@ export default function CustomerCreatePageLayout() {
                   onChangeText={handleChange("branch_id")}
                   onBlur={handleBlur("branch_id")}
                   value={values.branch_id}
+                />
+                <Input
+                  style={styles.input}
+                  label="Tax Code"
+                  onChangeText={handleChange("tax_code")}
+                  onBlur={handleBlur("tax_code")}
+                  value={values.tax_code}
                 />
                 <Input
                   style={styles.input}

@@ -76,12 +76,6 @@ export default function UserManagerPage() {
               <Text>1</Text>
             </Button>
             <Button>
-              <Text>2</Text>
-            </Button>
-            <Button>
-              <Text>3</Text>
-            </Button>
-            <Button>
               <FontAwesome name="angle-right" />
             </Button>
           </ButtonGroup>
